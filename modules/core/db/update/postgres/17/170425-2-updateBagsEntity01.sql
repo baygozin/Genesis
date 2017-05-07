@@ -1,0 +1,2 @@
+alter table GENESIS_BAGS_ENTITY add constraint FK_GENESIS_BAGS_ENTITY_FILE foreign key (FILE_ID) references SYS_FILE(ID);
+create index IDX_GENESIS_BAGS_ENTITY_FILE on GENESIS_BAGS_ENTITY (FILE_ID);

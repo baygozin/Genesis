@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<studio>
+    <settings>
+        <showInfoOutdatedScheme>false</showInfoOutdatedScheme>
+    </settings>
+    <screenDesigner>
+        <screen module="web"
+                presentSize="1280x1024"
+                reference="ru/bov/genesis/web/building/building-edit.xml"/>
+        <screen module="web"
+                presentSize="1280x1024"
+                reference="ru/bov/genesis/web/employee/employee-edit.xml"/>
+    </screenDesigner>
+</studio>

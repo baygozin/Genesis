@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
+    <view class="ru.bov.genesis.entity.test.MyPhoto"
+          extends="_local"
+          name="myPhoto-view">
+        <property name="image"
+                  view="_minimal">
+        </property>
+    </view>
+    <view class="ru.bov.genesis.entity.mainentity.Employee"
+          extends="_local"
+          name="employee-view">
+        <property name="image"
+                  view="_minimal"/>
+        <property name="position"
+                  view="_minimal">
+        </property>
+        <property name="direction_work"
+                  view="_minimal">
+        </property>
+        <property name="profession"
+                  view="_minimal"/>
+        <property name="naks_image"
+                  view="_minimal"/>
+        <property name="vik_image"
+                  view="_minimal"/>
+        <property name="vuz_image"
+                  view="_minimal"/>
+        <property name="courses"
+                  view="_minimal"/>
+        <property name="building"
+                  view="_minimal"/>
+        <property name="storageFile"
+                  view="_minimal"/>
+    </view>
+    <view class="ru.bov.genesis.entity.services.Department"
+          extends="_local"
+          name="department-view"/>
+    <view class="ru.bov.genesis.entity.services.Directing"
+          extends="_local"
+          name="directing-view"/>
+    <view class="ru.bov.genesis.entity.services.Position"
+          extends="_local"
+          name="position-view"/>
+    <view class="ru.bov.genesis.entity.services.Professions"
+          extends="_local"
+          name="professions-view"/>
+    <view class="ru.bov.genesis.entity.services.TypeDocuments"
+          extends="_local"
+          name="typeDocuments-view"/>
+    <view class="ru.bov.genesis.entity.services.Courses"
+          extends="_local"
+          name="courses-view">
+        <property name="image"
+                  view="_minimal"/>
+    </view>
+    <view class="ru.bov.genesis.entity.services.StorageFiles"
+          extends="_local"
+          name="storageFiles-view">
+        <property name="file"
+                  view="_minimal">
+            <property name="size"/>
+        </property>
+    </view>
+    <view class="ru.bov.genesis.entity.services.BagsEntity"
+          extends="_local"
+          name="bagsEntity-view">
+        <property name="file"
+                  view="_minimal"/>
+    </view>
+    <view class="ru.bov.genesis.entity.mainentity.Building"
+          extends="_local"
+          name="building-view">
+        <property name="employeeCk"
+                  view="_minimal">
+            <property name="position">
+                <property name="namePosition"/>
+            </property>
+            <property name="direction_work">
+                <property name="nameDirecting"/>
+            </property>
+            <property name="profession">
+                <property name="nameProfession"/>
+            </property>
+            <property name="dateWorkStart"/>
+            <property name="dateWorkEnd"/>
+            <property name="phoneMobile"/>
+            <property name="phoneHome"/>
+            <property name="phoneOffice"/>
+            <property name="emailPrivate"/>
+            <property name="emailOffice"/>
+        </property>
+        <property name="persons"
+                  view="_minimal"/>
+        <property name="imageContract"
+                  view="_minimal"/>
+    </view>
+    <view class="ru.bov.genesis.entity.services.Persons"
+          extends="_local"
+          name="persons-view"/>
+</views>

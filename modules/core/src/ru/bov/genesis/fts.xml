@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fts-config xmlns="http://schemas.haulmont.com/cuba/fts.xsd">
+    <entities>
+        <entity class="ru.bov.genesis.entity.services.Professions">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.services.Position">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.services.Directing">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.services.Department">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.test.MyPhoto">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.services.TypeDocuments">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.mainentity.Employee">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.services.Courses">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.services.StorageFiles">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.services.BagsEntity">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.mainentity.Building">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.services.Persons">
+            <include re=".*"/>
+        </entity>
+    </entities>
+</fts-config>

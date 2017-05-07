@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://browseCaption"
+        class="ru.bov.genesis.web.myphoto.MyPhotoBrowse"
+        focusComponent="myPhotosTable"
+        lookupComponent="myPhotosTable"
+        messagesPack="ru.bov.genesis.web.myphoto">
+    <dsContext>
+        <groupDatasource id="myPhotosDs"
+                         class="ru.bov.genesis.entity.test.MyPhoto"
+                         view="myPhoto-view">
+            <query>
+                <![CDATA[select e from genesis$MyPhoto e]]>
+            </query>
+        </groupDatasource>
+    </dsContext>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="myPhotosTable"
+            spacing="true">
+        <groupTable id="myPhotosTable"
+                    width="100%">
+            <actions>
+                <action id="create"/>
+                <action id="edit"/>
+                <action id="remove"/>
+            </actions>
+            <columns>
+                <column id="name"/>
+                <column id="image"/>
+            </columns>
+            <rows datasource="myPhotosDs"/>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="myPhotosTable.create"/>
+                <button id="editBtn"
+                        action="myPhotosTable.edit"/>
+                <button id="removeBtn"
+                        action="myPhotosTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+    </layout>
+</window>

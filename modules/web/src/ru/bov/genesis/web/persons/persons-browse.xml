@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://browseCaption"
+        class="ru.bov.genesis.web.persons.PersonsBrowse"
+        focusComponent="personsesTable"
+        lookupComponent="personsesTable"
+        messagesPack="ru.bov.genesis.web.persons">
+    <dsContext>
+        <groupDatasource id="personsesDs"
+                         class="ru.bov.genesis.entity.services.Persons"
+                         view="persons-view">
+            <query>
+                <![CDATA[select e from genesis$Persons e]]>
+            </query>
+        </groupDatasource>
+    </dsContext>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="personsesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="personsesTable"
+                datasource="personsesDs">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="personsesTable"
+                    width="100%">
+            <actions>
+                <action id="create"/>
+                <action id="edit"/>
+                <action id="remove"/>
+            </actions>
+            <columns>
+                <column id="namePerson"/>
+                <column id="positionPerson"/>
+                <column id="phonePerson"/>
+                <column id="emailPerson"/>
+                <column id="notePerson"/>
+            </columns>
+            <rows datasource="personsesDs"/>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="personsesTable.create"/>
+                <button id="editBtn"
+                        action="personsesTable.edit"/>
+                <button id="removeBtn"
+                        action="personsesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+    </layout>
+</window>

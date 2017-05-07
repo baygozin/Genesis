@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             version="2.0">
+    <persistence-unit name="Genesis"
+                      transaction-type="RESOURCE_LOCAL">
+        <class>ru.bov.genesis.entity.services.Professions</class>
+        <class>ru.bov.genesis.entity.services.Position</class>
+        <class>ru.bov.genesis.entity.services.Directing</class>
+        <class>ru.bov.genesis.entity.services.Department</class>
+        <class>ru.bov.genesis.entity.test.MyPhoto</class>
+        <class>ru.bov.genesis.entity.services.TypeDocuments</class>
+        <class>ru.bov.genesis.entity.mainentity.Employee</class>
+        <class>ru.bov.genesis.entity.services.Courses</class>
+        <class>ru.bov.genesis.entity.services.StorageFiles</class>
+        <class>ru.bov.genesis.entity.services.BagsEntity</class>
+        <class>ru.bov.genesis.entity.mainentity.Building</class>
+        <class>ru.bov.genesis.entity.services.Persons</class>
+    </persistence-unit>
+</persistence>

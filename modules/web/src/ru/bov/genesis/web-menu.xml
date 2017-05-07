@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
+    <menu id="application"
+          insertBefore="reports">
+        <item id="genesis$Employee.browse"
+              screen="genesis$Employee.browse"/>
+        <item id="genesis$Building.browse"
+              screen="genesis$Building.browse"/>
+    </menu>
+    <menu id="setup"
+          insertBefore="reports">
+        <item openType="NEW_TAB"
+              screen="genesis$BagsEntity.browse"/>
+    </menu>
+</menu-config>

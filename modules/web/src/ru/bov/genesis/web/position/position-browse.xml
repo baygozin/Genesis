@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://browseCaption"
+        class="ru.bov.genesis.web.position.PositionBrowse"
+        focusComponent="positionsTable"
+        lookupComponent="positionsTable"
+        messagesPack="ru.bov.genesis.web.position">
+    <dsContext>
+        <groupDatasource id="positionsDs"
+                         class="ru.bov.genesis.entity.services.Position"
+                         view="_local">
+            <query>
+                <![CDATA[select e from genesis$Position e]]>
+            </query>
+        </groupDatasource>
+    </dsContext>
+    <dialogMode closeable="true"
+                forceDialog="true"
+                height="600"
+                modal="true"
+                resizable="true"
+                width="800"/>
+    <layout spacing="true">
+        <groupTable id="positionsTable"
+                    height="100%"
+                    width="100%">
+            <actions>
+                <action id="create"
+                        openType="DIALOG"/>
+                <action id="edit"
+                        openType="DIALOG"/>
+                <action id="remove"/>
+            </actions>
+            <columns>
+                <column id="namePosition"/>
+            </columns>
+            <rows datasource="positionsDs"/>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="positionsTable.create"/>
+                <button id="editBtn"
+                        action="positionsTable.edit"/>
+                <button id="removeBtn"
+                        action="positionsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+    </layout>
+</window>

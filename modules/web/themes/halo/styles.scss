@@ -1,0 +1,70 @@
+@import "halo-defaults";
+@import "ru.bov.genesis/halo-ext-defaults";
+@import "app-components";
+@import "ru.bov.genesis/halo-ext";
+
+.halo {
+  // include auto-generated app components SCSS
+  @include app_components;
+  
+  @include ru_bov_genesis-halo-ext;
+
+  .v-grid-cell.default-status {
+    font-weight: bold;
+  }
+
+  .v-grid-cell.yellow-status {
+    font-weight: bold;
+    background-color: #aaaa00;
+    color: #ffffff;
+  }
+
+  .v-grid-cell.red-status {
+    font-weight: bold;
+    background-color: #910000;
+    color: #ffffff;
+  }
+
+  .v-grid-cell.green-status {
+    font-weight: bold;
+    background-color: #009100;
+    color: #ffffff;
+  }
+
+  .v-grid-cell.blue-status {
+    font-weight: bold;
+    background-color: blue;
+    color: white;
+  }
+
+}
+
+default-status {
+  font-weight: bold;
+}
+
+yellow-status {
+  font-weight: bold;
+  background-color: #aaaa00;
+  color: #ffffff;
+}
+
+red-status {
+  font-weight: bold;
+  background-color: #910000;
+  color: #ffffff;
+}
+
+green-status {
+  font-weight: bold;
+  background-color: #009100;
+  color: #ffffff;
+}
+
+blue-status {
+  font-weight: bold;
+  background-color: blue;
+  color: white;
+}
+
+

@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://editorCaption"
+        class="ru.bov.genesis.web.employee.EmployeeEdit"
+        datasource="employeeDs"
+        focusComponent="fieldGroupPersonal"
+        messagesPack="ru.bov.genesis.web.employee">
+    <dsContext>
+        <datasource id="employeeDs"
+                    class="ru.bov.genesis.entity.mainentity.Employee"
+                    view="employee-view">
+            <collectionDatasource id="coursesDs"
+                                  property="courses"/>
+            <datasource id="buildingDs"
+                        property="building"/>
+            <collectionDatasource id="filesDs"
+                                  property="storageFile"/>
+        </datasource>
+        <collectionDatasource id="positionsDs"
+                              class="ru.bov.genesis.entity.services.Position"
+                              view="_minimal">
+            <query>
+                <![CDATA[select e from genesis$Position e]]>
+            </query>
+        </collectionDatasource>
+        <collectionDatasource id="direction_worksDs"
+                              class="ru.bov.genesis.entity.services.Directing"
+                              view="_minimal">
+            <query>
+                <![CDATA[select e from genesis$Directing e]]>
+            </query>
+        </collectionDatasource>
+        <collectionDatasource id="professionsDs"
+                              class="ru.bov.genesis.entity.services.Professions"
+                              view="_minimal">
+            <query>
+                <![CDATA[select e from genesis$Professions e]]>
+            </query>
+        </collectionDatasource>
+        <collectionDatasource id="buildingsDs"
+                              class="ru.bov.genesis.entity.mainentity.Building"
+                              view="_minimal">
+            <query>
+                <![CDATA[select e from genesis$Building e]]>
+            </query>
+        </collectionDatasource>
+    </dsContext>
+    <dialogMode height="520"
+                width="980"/>
+    <layout expand="hboxMain"
+            margin="true"
+            spacing="true">
+        <hbox id="vboxFIO"
+              spacing="true"
+              width="100%">
+            <label id="labelFio"
+                   align="TOP_CENTER"
+                   height="100%"
+                   htmlEnabled="true"
+                   value="labelFIO"
+                   width="100%"/>
+        </hbox>
+        <hbox id="hboxMain"
+              expand="tabSheetEmployee"
+              spacing="true"
+              width="100%">
+            <groupBox id="imageGroupBox"
+                      responsive="true"
+                      spacing="true"
+                      width="300px">
+                <embedded id="imagePhoto"
+                          align="MIDDLE_CENTER"
+                          type="IMAGE"
+                          width="300px"/>
+                <pickerField id="buildingLookup"
+                             datasource="employeeDs"
+                             editable="false"
+                             property="building"
+                             width="100%"/>
+            </groupBox>
+            <tabSheet id="tabSheetEmployee"
+                      height="100%"
+                      responsive="true">
+                <tab id="tabPerson"
+                     caption="msg://nameTabPersonData"
+                     margin="true"
+                     spacing="true">
+                    <hbox id="personData"
+                          height="100%"
+                          spacing="true">
+                        <vbox spacing="true">
+                            <fieldGroup id="fieldGroupPersonal"
+                                        border="visible"
+                                        caption="msg://personDataName"
+                                        datasource="employeeDs"
+                                        fieldCaptionWidth="130"
+                                        width="100%">
+                                <column width="250px">
+                                    <field id="lastName"
+                                           tabIndex="1"/>
+                                    <field id="firstName"
+                                           tabIndex="2"/>
+                                    <field id="middleName"
+                                           tabIndex="3"/>
+                                    <field id="gender"
+                                           tabIndex="4"/>
+                                    <field id="martialStatus"
+                                           tabIndex="5"/>
+                                    <field id="addressResidential"
+                                           rows="3"
+                                           tabIndex="6"/>
+                                    <field id="phoneHome"
+                                           caption="msg://phoneGlobe"
+                                           property="phoneHome"
+                                           rows="2"
+                                           tabIndex="7"/>
+                                    <field id="emailPrivate"
+                                           caption="msg://emailGlobe"
+                                           rows="2"
+                                           tabIndex="8"/>
+                                    <field id="image"
+                                           tabIndex="9"/>
+                                    <field property="dateWorkStart"/>
+                                    <field property="dateWorkEnd"/>
+                                </column>
+                            </fieldGroup>
+                            <fieldGroup id="workGroup"
+                                        border="visible"
+                                        caption="msg://work"
+                                        datasource="employeeDs"
+                                        fieldCaptionWidth="130">
+                                <column width="250px">
+                                    <field id="position"
+                                           datasource="employeeDs"
+                                           property="position"
+                                           tabIndex="10"/>
+                                    <field id="direction_work"
+                                           property="direction_work"
+                                           tabIndex="11"/>
+                                    <field id="profession"
+                                           property="profession"
+                                           tabIndex="12"/>
+                                </column>
+                            </fieldGroup>
+                        </vbox>
+                        <vbox spacing="true"
+                              width="AUTO">
+                            <fieldGroup id="pasportGroup"
+                                        border="visible"
+                                        caption="msg://pasport"
+                                        datasource="employeeDs"
+                                        fieldCaptionWidth="130">
+                                <column width="300px">
+                                    <field id="pass_series"
+                                           tabIndex="17"/>
+                                    <field id="pass_number"
+                                           tabIndex="18"/>
+                                    <field id="pass_issued"
+                                           rows="2"
+                                           tabIndex="19"/>
+                                    <field id="pass_issued_date"
+                                           tabIndex="20"/>
+                                    <field id="birthday"
+                                           tabIndex="21"/>
+                                    <field id="placeOfBirth"
+                                           tabIndex="22"/>
+                                    <field id="addressRegistration"
+                                           rows="3"
+                                           tabIndex="23"/>
+                                    <field id="dateAddresRegistration"
+                                           tabIndex="24"/>
+                                    <field property="numberINN"
+                                           tabIndex="25"/>
+                                    <field property="numberPFR"
+                                           tabIndex="26"/>
+                                </column>
+                            </fieldGroup>
+                            <fieldGroup id="medicalGroup"
+                                        border="visible"
+                                        caption="msg://medicalGroupName"
+                                        datasource="employeeDs">
+                                <column width="100px">
+                                    <field property="medicalCheckBaseBegin"
+                                           tabIndex="13"/>
+                                    <field property="medicalCheckBaseEnd"
+                                           tabIndex="14"/>
+                                </column>
+                                <column>
+                                    <field property="medicalCheckPeriodicBegin"
+                                           tabIndex="15"/>
+                                    <field property="medicalCheckPeriodicEnd"
+                                           tabIndex="16"/>
+                                </column>
+                            </fieldGroup>
+                        </vbox>
+                    </hbox>
+                </tab>
+                <tab id="tabLearn"
+                     caption="msg://nameTabLearn"
+                     margin="true"
+                     spacing="true">
+                    <vbox id="vboxNaks"
+                          spacing="true">
+                        <hbox spacing="true">
+                            <fieldGroup id="fieldGroupVuz"
+                                        border="visible"
+                                        caption="msg://groupVuzName"
+                                        datasource="employeeDs">
+                                <column width="250px">
+                                    <field id="vuz_name"
+                                           rows="2"
+                                           tabIndex="1"/>
+                                    <field id="vuz_sity"
+                                           tabIndex="2"
+                                           width="120px"/>
+                                    <field id="vuz_spec"
+                                           tabIndex="3"/>
+                                    <field id="vuz_kval"
+                                           tabIndex="4"/>
+                                </column>
+                                <column width="250px">
+                                    <field id="vuz_number"
+                                           caption="msg://vuzNumber"
+                                           tabIndex="5"
+                                           width="120px"/>
+                                    <field id="vuz_date_begin"
+                                           caption="msg://vuzBegin"
+                                           property="vuz_date_begin"
+                                           tabIndex="6"
+                                           width="80px"/>
+                                    <field id="vuz_date_end"
+                                           caption="msg://vuzEnd"
+                                           property="vuz_date_end"
+                                           tabIndex="7"
+                                           width="80px"/>
+                                    <field id="vuz_image"
+                                           tabIndex="8"/>
+                                </column>
+                            </fieldGroup>
+                        </hbox>
+                        <hbox spacing="true">
+                            <fieldGroup id="fieldGroupVik"
+                                        border="visible"
+                                        caption="msg://groupVikName"
+                                        datasource="employeeDs"
+                                        fieldCaptionWidth="120px">
+                                <column fieldCaptionWidth="120px"
+                                        width="250px">
+                                    <field id="vik_number"
+                                           cols="2"
+                                           tabIndex="9"/>
+                                    <field id="vik_date_expire"
+                                           tabIndex="10"
+                                           width="100px"/>
+                                    <field id="vik_vik"
+                                           tabIndex="11"/>
+                                    <field id="vik_rk"
+                                           tabIndex="12"/>
+                                    <field id="vik_vk"
+                                           tabIndex="13"/>
+                                    <field id="vik_mk"
+                                           tabIndex="14"/>
+                                </column>
+                                <column fieldCaptionWidth="60px"
+                                        width="250px">
+                                    <field id="vik_ek"
+                                           tabIndex="15"/>
+                                    <field id="vik_uk"
+                                           tabIndex="16"/>
+                                    <field id="vik_pvt"
+                                           tabIndex="17"/>
+                                    <field id="vik_vd"
+                                           tabIndex="18"/>
+                                    <field id="vik_pvk"
+                                           tabIndex="19"/>
+                                    <field id="vik_image"
+                                           tabIndex="20"/>
+                                </column>
+                            </fieldGroup>
+                        </hbox>
+                        <hbox spacing="true">
+                            <fieldGroup id="fieldGroupNaks"
+                                        border="visible"
+                                        caption="msg://naksName"
+                                        datasource="employeeDs">
+                                <column fieldCaptionWidth="120px"
+                                        width="250px">
+                                    <field property="naks_number"
+                                           tabIndex="21"/>
+                                    <field property="naks_date_expire"
+                                           tabIndex="22"
+                                           width="100px"/>
+                                    <field property="naks_ko"
+                                           tabIndex="23"/>
+                                    <field property="naks_sk"
+                                           tabIndex="24"/>
+                                    <field property="naks_ngdo"
+                                           tabIndex="25"/>
+                                </column>
+                                <column fieldCaptionWidth="60px"
+                                        width="250px">
+                                    <field property="naks_ohnvp"
+                                           tabIndex="26"/>
+                                    <field property="naks_go"
+                                           tabIndex="27"/>
+                                    <field property="naks_pto"
+                                           tabIndex="28"/>
+                                    <field property="naks_image"
+                                           tabIndex="29"/>
+                                </column>
+                            </fieldGroup>
+                        </hbox>
+                    </vbox>
+                </tab>
+                <tab id="tabQualification"
+                     caption="msg://nameTabKvalification"
+                     margin="true"
+                     spacing="true">
+                    <vbox height="100%"
+                          spacing="true">
+                        <groupBox showAsPanel="true"
+                                  spacing="true">
+                            <table id="tableCourses"
+                                   caption="msg://sertificatTableName"
+                                   columnControlVisible="false"
+                                   height="129px"
+                                   width="100%">
+                                <actions>
+                                    <action id="create"/>
+                                    <action id="edit"/>
+                                    <action id="remove"/>
+                                </actions>
+                                <columns>
+                                    <column id="name"/>
+                                    <column id="organization"/>
+                                    <column id="city"/>
+                                    <column id="dateEnd"/>
+                                    <column id="hours"/>
+                                </columns>
+                                <rows datasource="coursesDs"/>
+                                <buttonsPanel>
+                                    <button action="tableCourses.create"/>
+                                    <button action="tableCourses.edit"/>
+                                    <button action="tableCourses.remove"/>
+                                </buttonsPanel>
+                            </table>
+                        </groupBox>
+                    </vbox>
+                </tab>
+                <tab id="tabOther"
+                     caption="msg://tabOtherName"
+                     margin="true"
+                     spacing="true">
+                    <table id="tableFiles"
+                           editable="true"
+                           width="100%">
+                        <actions>
+                            <action id="create"/>
+                            <action id="edit"/>
+                            <action id="remove"/>
+                        </actions>
+                        <columns>
+                            <column id="comment"/>
+                            <column id="file"
+                                    link="true"
+                                    linkInvoke="openFile"/>
+                        </columns>
+                        <rows datasource="filesDs"/>
+                        <buttonsPanel>
+                            <button action="tableFiles.create"/>
+                            <button action="tableFiles.edit"/>
+                            <button action="tableFiles.remove"/>
+                        </buttonsPanel>
+                    </table>
+                </tab>
+            </tabSheet>
+        </hbox>
+        <frame id="windowActions"
+               screen="editWindowActions"/>
+    </layout>
+</window>

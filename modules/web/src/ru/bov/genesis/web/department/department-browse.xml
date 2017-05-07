@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://browseCaption"
+        class="ru.bov.genesis.web.department.DepartmentBrowse"
+        focusComponent="departmentsTable"
+        lookupComponent="departmentsTable"
+        messagesPack="ru.bov.genesis.web.department">
+    <dsContext>
+        <groupDatasource id="departmentsDs"
+                         class="ru.bov.genesis.entity.services.Department"
+                         view="_local">
+            <query>
+                <![CDATA[select e from genesis$Department e]]>
+            </query>
+        </groupDatasource>
+    </dsContext>
+    <dialogMode closeable="true"
+                forceDialog="true"
+                height="600"
+                modal="true"
+                resizable="true"
+                width="800"/>
+    <layout spacing="true">
+        <groupTable id="departmentsTable"
+                    height="100%"
+                    width="100%">
+            <actions>
+                <action id="create"
+                        openType="DIALOG"/>
+                <action id="edit"
+                        openType="DIALOG"/>
+                <action id="remove"/>
+            </actions>
+            <columns>
+                <column id="nameDepartment"/>
+            </columns>
+            <rows datasource="departmentsDs"/>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="departmentsTable.create"/>
+                <button id="editBtn"
+                        action="departmentsTable.edit"/>
+                <button id="removeBtn"
+                        action="departmentsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+    </layout>
+</window>

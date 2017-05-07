@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://editorCaption"
+        class="ru.bov.genesis.web.courses.CoursesEdit"
+        datasource="coursesDs"
+        focusComponent="fieldGroup"
+        messagesPack="ru.bov.genesis.web.courses">
+    <dsContext>
+        <datasource id="coursesDs"
+                    class="ru.bov.genesis.entity.services.Courses"
+                    view="courses-view"/>
+    </dsContext>
+    <dialogMode closeable="true"
+                forceDialog="true"
+                height="300"
+                resizable="true"
+                width="380"/>
+    <layout expand="windowActions"
+            spacing="true">
+        <fieldGroup id="fieldGroup"
+                    align="MIDDLE_CENTER"
+                    border="visible"
+                    caption="msg://coursesName"
+                    datasource="coursesDs"
+                    responsive="true">
+            <column width="250px">
+                <field id="name"/>
+                <field id="organization"/>
+                <field id="city"/>
+                <field id="dateEnd"/>
+                <field id="hours"/>
+                <field id="image"/>
+            </column>
+        </fieldGroup>
+        <frame id="windowActions"
+               align="TOP_CENTER"
+               screen="editWindowActions"
+               width="AUTO"/>
+    </layout>
+</window>

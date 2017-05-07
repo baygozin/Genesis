@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://editorCaption"
+        class="ru.bov.genesis.web.storagefiles.StorageFilesEdit"
+        datasource="storageFilesDs"
+        focusComponent="fieldGroup"
+        messagesPack="ru.bov.genesis.web.storagefiles">
+    <dsContext>
+        <datasource id="storageFilesDs"
+                    class="ru.bov.genesis.entity.services.StorageFiles"
+                    view="storageFiles-view"/>
+    </dsContext>
+    <dialogMode closeable="true"
+                forceDialog="true"
+                modal="true"
+                resizable="true"/>
+    <layout expand="windowActions"
+            spacing="true">
+        <fieldGroup id="fieldGroup"
+                    datasource="storageFilesDs">
+            <column width="400px">
+                <field property="comment"/>
+                <field property="file"/>
+            </column>
+        </fieldGroup>
+        <frame id="windowActions"
+               screen="editWindowActions"/>
+    </layout>
+</window>

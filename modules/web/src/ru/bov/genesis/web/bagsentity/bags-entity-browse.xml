@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://browseCaption"
+        class="ru.bov.genesis.web.bagsentity.BagsEntityBrowse"
+        focusComponent="bagsEntitiesTable"
+        lookupComponent="bagsEntitiesTable"
+        messagesPack="ru.bov.genesis.web.bagsentity">
+    <dsContext>
+        <groupDatasource id="bagsEntitiesDs"
+                         class="ru.bov.genesis.entity.services.BagsEntity"
+                         view="bagsEntity-view">
+            <query>
+                <![CDATA[select e from genesis$BagsEntity e]]>
+            </query>
+        </groupDatasource>
+    </dsContext>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="bagsEntitiesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="bagsEntitiesTable"
+                datasource="bagsEntitiesDs">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="bagsEntitiesTable"
+                    multiLineCells="true"
+                    presentations="true"
+                    responsive="true"
+                    width="100%">
+            <actions>
+                <action id="create"/>
+                <action id="edit"/>
+                <action id="remove"/>
+            </actions>
+            <columns>
+                <column id="bugDateTime"/>
+                <column id="bugField"/>
+                <column id="bugAnswer"/>
+                <column id="bugStatus"/>
+                <column id="file"/>
+            </columns>
+            <rows datasource="bagsEntitiesDs"/>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="bagsEntitiesTable.create"/>
+                <button id="editBtn"
+                        action="bagsEntitiesTable.edit"/>
+                <button id="removeBtn"
+                        action="bagsEntitiesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+    </layout>
+</window>

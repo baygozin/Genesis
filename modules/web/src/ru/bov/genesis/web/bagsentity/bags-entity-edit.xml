@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://editorCaption"
+        class="ru.bov.genesis.web.bagsentity.BagsEntityEdit"
+        datasource="bagsEntityDs"
+        focusComponent="fieldGroup"
+        messagesPack="ru.bov.genesis.web.bagsentity">
+    <dsContext>
+        <datasource id="bagsEntityDs"
+                    class="ru.bov.genesis.entity.services.BagsEntity"
+                    view="bagsEntity-view"/>
+    </dsContext>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="windowActions"
+            spacing="true">
+        <fieldGroup id="fieldGroup"
+                    datasource="bagsEntityDs">
+            <column width="400px">
+                <field property="bugField"
+                       rows="5"/>
+                <field property="bugAnswer"
+                       rows="5"/>
+                <field property="bugStatus"/>
+                <field property="file"/>
+            </column>
+        </fieldGroup>
+        <frame id="windowActions"
+               screen="editWindowActions"/>
+    </layout>
+</window>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://browseCaption"
+        class="ru.bov.genesis.web.typedocuments.TypeDocumentsBrowse"
+        focusComponent="typeDocumentsesTable"
+        lookupComponent="typeDocumentsesTable"
+        messagesPack="ru.bov.genesis.web.typedocuments">
+    <dsContext>
+        <groupDatasource id="typeDocumentsesDs"
+                         class="ru.bov.genesis.entity.services.TypeDocuments"
+                         view="_local">
+            <query>
+                <![CDATA[select e from genesis$TypeDocuments e]]>
+            </query>
+        </groupDatasource>
+    </dsContext>
+    <dialogMode closeable="true"
+                forceDialog="true"
+                height="600"
+                modal="true"
+                resizable="true"
+                width="800"/>
+    <layout expand="typeDocumentsesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="typeDocumentsesTable"
+                datasource="typeDocumentsesDs">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="typeDocumentsesTable"
+                    width="100%">
+            <actions>
+                <action id="create"/>
+                <action id="edit"/>
+                <action id="remove"/>
+            </actions>
+            <columns>
+                <column id="nameDocument"/>
+            </columns>
+            <rows datasource="typeDocumentsesDs"/>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="typeDocumentsesTable.create"/>
+                <button id="editBtn"
+                        action="typeDocumentsesTable.edit"/>
+                <button id="removeBtn"
+                        action="typeDocumentsesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+    </layout>
+</window>

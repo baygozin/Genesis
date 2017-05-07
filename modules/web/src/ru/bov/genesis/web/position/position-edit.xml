@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://editorCaption"
+        class="ru.bov.genesis.web.position.PositionEdit"
+        datasource="positionDs"
+        focusComponent="fieldGroup"
+        messagesPack="ru.bov.genesis.web.position">
+    <dsContext>
+        <datasource id="positionDs"
+                    class="ru.bov.genesis.entity.services.Position"
+                    view="_local"/>
+    </dsContext>
+    <dialogMode forceDialog="true"
+                height="AUTO"
+                modal="true"
+                width="600"/>
+    <layout expand="windowActions"
+            spacing="true">
+        <fieldGroup id="fieldGroup"
+                    datasource="positionDs">
+            <column width="250px">
+                <field id="namePosition"/>
+            </column>
+        </fieldGroup>
+        <frame id="windowActions"
+               screen="editWindowActions"/>
+    </layout>
+</window>

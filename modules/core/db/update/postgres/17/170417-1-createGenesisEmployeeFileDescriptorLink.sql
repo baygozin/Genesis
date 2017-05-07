@@ -1,0 +1,5 @@
+create table GENESIS_EMPLOYEE_FILE_DESCRIPTOR_LINK (
+    EMPLOYEE_ID uuid,
+    FILE_DESCRIPTOR_ID uuid,
+    primary key (EMPLOYEE_ID, FILE_DESCRIPTOR_ID)
+);

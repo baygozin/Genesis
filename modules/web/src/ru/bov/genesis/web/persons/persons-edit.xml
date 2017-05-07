@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://editorCaption"
+        class="ru.bov.genesis.web.persons.PersonsEdit"
+        datasource="personsDs"
+        focusComponent="fieldGroup"
+        messagesPack="ru.bov.genesis.web.persons">
+    <dsContext>
+        <datasource id="personsDs"
+                    class="ru.bov.genesis.entity.services.Persons"
+                    view="persons-view"/>
+    </dsContext>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="windowActions"
+            spacing="true">
+        <fieldGroup id="fieldGroup"
+                    datasource="personsDs">
+            <column width="300px">
+                <field property="namePerson"/>
+                <field property="positionPerson"/>
+                <field property="phonePerson"/>
+                <field property="emailPerson"/>
+                <field property="notePerson"
+                       rows="5"/>
+            </column>
+        </fieldGroup>
+        <frame id="windowActions"
+               screen="editWindowActions"/>
+    </layout>
+</window>

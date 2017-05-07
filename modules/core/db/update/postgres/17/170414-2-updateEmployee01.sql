@@ -1,0 +1,15 @@
+alter table GENESIS_EMPLOYEE add column GENDER varchar(50) ;
+alter table GENESIS_EMPLOYEE add column BIRTHDAY date ;
+alter table GENESIS_EMPLOYEE add column PLACE_OF_BIRTH varchar(255) ;
+alter table GENESIS_EMPLOYEE add column ADDRESS_POSTAL varchar(255) ;
+alter table GENESIS_EMPLOYEE add column ADDRESS_RESIDENTIAL varchar(255) ;
+alter table GENESIS_EMPLOYEE add column ADDRESS_REGISTRATION varchar(255) ;
+alter table GENESIS_EMPLOYEE add column DATE_ADDRES_REGISTRATION date ;
+alter table GENESIS_EMPLOYEE add column MARTIAL_STATUS integer ;
+alter table GENESIS_EMPLOYEE add column NUMBER_INN varchar(12) ;
+alter table GENESIS_EMPLOYEE add column NUMBER_PFR varchar(14) ;
+alter table GENESIS_EMPLOYEE add column PHONE_MOBILE varchar(16) ;
+alter table GENESIS_EMPLOYEE add column PHONE_HOME varchar(16) ;
+alter table GENESIS_EMPLOYEE add column PHONE_OFFICE varchar(16) ;
+alter table GENESIS_EMPLOYEE add column EMAIL_PRIVATE varchar(255) ;
+alter table GENESIS_EMPLOYEE add column EMAIL_OFFICE varchar(255) ;

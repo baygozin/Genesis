@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<app-component xmlns="http://schemas.haulmont.com/cuba/app-component.xsd"
+               dependsOn="com.haulmont.reports, com.haulmont.charts, com.haulmont.cuba, com.haulmont.fts, com.haulmont.bpm">
+    <module blocks="*"
+            name="global">
+        <artifact appJar="true"
+                  name="app-global"/>
+        <property name="cuba.persistenceConfig"
+                  value="+ru/bov/genesis/persistence.xml"/>
+        <property name="cuba.metadataConfig"
+                  value="+ru/bov/genesis/metadata.xml"/>
+        <property name="cuba.viewsConfig"
+                  value="+ru/bov/genesis/views.xml"/>
+    </module>
+    <module blocks="core"
+            dependsOn="global"
+            name="core">
+        <artifact appJar="true"
+                  name="app-core"/>
+        <artifact classifier="db"
+                  configuration="dbscripts"
+                  ext="zip"
+                  name="app-core"/>
+        <property name="cuba.springContextConfig"
+                  value="+ru/bov/genesis/spring.xml"/>
+        <property name="cuba.ftsConfig"
+                  value="+ru/bov/genesis/fts.xml"/>
+        <property name="cuba.mainMessagePack"
+                  value="+ru.bov.genesis.core"/>
+    </module>
+    <module blocks="web,desktop"
+            dependsOn="global"
+            name="gui">
+        <artifact appJar="true"
+                  name="app-gui"/>
+    </module>
+    <module blocks="web"
+            dependsOn="gui"
+            name="web">
+        <artifact appJar="true"
+                  name="app-web"/>
+        <artifact classifier="web"
+                  configuration="webcontent"
+                  ext="zip"
+                  name="app-web"/>
+        <artifact configuration="themes"
+                  name="app-web-themes"/>
+        <property name="cuba.springContextConfig"
+                  value="+ru/bov/genesis/web-spring.xml"/>
+        <property name="cuba.dispatcherSpringContextConfig"
+                  value="+ru/bov/genesis/web-dispatcher-spring.xml"/>
+        <property name="cuba.windowConfig"
+                  value="+ru/bov/genesis/web-screens.xml"/>
+        <property name="cuba.menuConfig"
+                  value="+ru/bov/genesis/web-menu.xml"/>
+        <property name="cuba.permissionConfig"
+                  value="+ru/bov/genesis/web-permissions.xml"/>
+        <property name="cuba.mainMessagePack"
+                  value="+ru.bov.genesis.web"/>
+    </module>
+    <module name="web-themes">
+        <artifact name="app-web-themes"/>
+    </module>
+</app-component>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://browseCaption"
+        class="ru.bov.genesis.web.professions.ProfessionsBrowse"
+        focusComponent="professionsesTable"
+        lookupComponent="professionsesTable"
+        messagesPack="ru.bov.genesis.web.professions">
+    <dsContext>
+        <groupDatasource id="professionsesDs"
+                         class="ru.bov.genesis.entity.services.Professions"
+                         view="_local">
+            <query>
+                <![CDATA[select e from genesis$Professions e]]>
+            </query>
+        </groupDatasource>
+    </dsContext>
+    <dialogMode closeable="true"
+                forceDialog="true"
+                height="600"
+                modal="true"
+                resizable="true"
+                width="800"/>
+    <layout spacing="true">
+        <groupTable id="professionsesTable"
+                    height="100%"
+                    width="100%">
+            <actions>
+                <action id="create"
+                        openType="DIALOG"/>
+                <action id="edit"
+                        openType="DIALOG"/>
+                <action id="remove"/>
+            </actions>
+            <columns>
+                <column id="nameProfession"/>
+            </columns>
+            <rows datasource="professionsesDs"/>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="professionsesTable.create"/>
+                <button id="editBtn"
+                        action="professionsesTable.edit"/>
+                <button id="removeBtn"
+                        action="professionsesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+    </layout>
+</window>

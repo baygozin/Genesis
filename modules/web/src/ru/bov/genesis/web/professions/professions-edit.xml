@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://editorCaption"
+        class="ru.bov.genesis.web.professions.ProfessionsEdit"
+        datasource="professionsDs"
+        focusComponent="fieldGroup"
+        messagesPack="ru.bov.genesis.web.professions">
+    <dsContext>
+        <datasource id="professionsDs"
+                    class="ru.bov.genesis.entity.services.Professions"
+                    view="_local"/>
+    </dsContext>
+    <dialogMode forceDialog="true"
+                height="AUTO"
+                modal="true"
+                width="600"/>
+    <layout expand="windowActions"
+            spacing="true">
+        <fieldGroup id="fieldGroup"
+                    datasource="professionsDs">
+            <column width="250px">
+                <field id="nameProfession"/>
+            </column>
+        </fieldGroup>
+        <frame id="windowActions"
+               screen="editWindowActions"/>
+    </layout>
+</window>

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://editorCaption"
+        class="ru.bov.genesis.web.building.BuildingEdit"
+        datasource="buildingDs"
+        focusComponent="fieldGroup"
+        messagesPack="ru.bov.genesis.web.building"
+        xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
+    <dsContext>
+        <datasource id="buildingDs"
+                    class="ru.bov.genesis.entity.mainentity.Building"
+                    view="building-view">
+            <collectionDatasource id="employeeCkDs"
+                                  property="employeeCk"/>
+            <collectionDatasource id="personsDs"
+                                  property="persons"/>
+        </datasource>
+        <collectionDatasource id="imageContractsDs"
+                              class="com.haulmont.cuba.core.entity.FileDescriptor"
+                              view="_minimal"/>
+    </dsContext>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="tabSheetBuilding"
+            spacing="true">
+        <tabSheet id="tabSheetBuilding">
+            <tab id="tabSheetCommon"
+                 caption="msg://Tab"
+                 margin="true">
+                <hbox id="hboxMap"
+                      height="100%"
+                      spacing="true"
+                      width="100%">
+                    <split id="splitLine"
+                           height="100%"
+                           orientation="horizontal"
+                           width="100%">
+                        <groupBox id="groupBoxData"
+                                  caption="msg://commonInfo"
+                                  height="100%"
+                                  spacing="true">
+                            <vbox id="vboxData"
+                                  expand="personsTable"
+                                  height="100%"
+                                  margin="true"
+                                  spacing="true">
+                                <fieldGroup id="fieldGroup"
+                                            border="visible"
+                                            datasource="buildingDs"
+                                            width="100%">
+                                    <column>
+                                        <field property="nameShort"
+                                               tabIndex="1"/>
+                                        <field property="customer"
+                                               rows="2"
+                                               tabIndex="3"/>
+                                        <field caption="msg://fieldContractName"
+                                               property="contract"
+                                               tabIndex="4"/>
+                                        <field caption="msg://fieldFileName"
+                                               optionsDatasource="imageContractsDs"
+                                               property="imageContract"/>
+                                    </column>
+                                    <column width="250px">
+                                        <field property="nameFull"
+                                               rows="2"
+                                               tabIndex="2"/>
+                                        <field property="typeWork"
+                                               rows="2"
+                                               tabIndex="5"/>
+                                        <field property="dateBegin"
+                                               tabIndex="6"/>
+                                        <field property="dateEnd"
+                                               tabIndex="7"/>
+                                        <field property="place"
+                                               tabIndex="8"
+                                               visible="false"/>
+                                    </column>
+                                </fieldGroup>
+                                <table id="personsTable"
+                                       caption="msg://personsTableName"
+                                       columnControlVisible="false"
+                                       width="100%">
+                                    <actions>
+                                        <action id="create"/>
+                                        <action id="edit"/>
+                                        <action id="remove"/>
+                                    </actions>
+                                    <columns>
+                                        <column id="namePerson"/>
+                                        <column id="positionPerson"/>
+                                        <column id="phonePerson"/>
+                                        <column id="emailPerson"/>
+                                        <column id="notePerson"/>
+                                    </columns>
+                                    <rows datasource="personsDs"/>
+                                    <buttonsPanel>
+                                        <button action="personsTable.create"/>
+                                        <button action="personsTable.edit"/>
+                                        <button action="personsTable.remove"/>
+                                    </buttonsPanel>
+                                </table>
+                            </vbox>
+                        </groupBox>
+                        <vbox id="vboxMap"
+                              expand="googleMapView_groupBox"
+                              height="100%"
+                              spacing="true"
+                              width="AUTO">
+                            <groupBox id="googleMapView_groupBox"
+                                      caption="msg://mapBuilding"
+                                      spacing="true">
+                                <chart:mapViewer id="googleMapView"
+                                                 height="500px"
+                                                 mapType="terrain"
+                                                 width="500px"/>
+                            </groupBox>
+                            <lookupField id="typeMap"
+                                         caption="msg://typeMapName"
+                                         datasource="buildingDs"
+                                         filterMode="NO"
+                                         property="placeType"/>
+                        </vbox>
+                    </split>
+                </hbox>
+            </tab>
+            <tab id="tabSheetCK"
+                 caption="msg://tabGroupCK"
+                 margin="true"
+                 spacing="true">
+                <vbox>
+                    <hbox height="100%"
+                          width="100%">
+                        <groupBox id="groupBoxEmployee"
+                                  caption="msg://dataGroupBoxName">
+                            <dataGrid id="dataGridEmployeeCK"
+                                      datasource="employeeCkDs"
+                                      height="100%"
+                                      reorderingAllowed="false"
+                                      textSelectionEnabled="true"
+                                      width="100%">
+                                <actions>
+                                    <action id="add"/>
+                                    <action id="exclude"/>
+                                </actions>
+                                <columns>
+                                    <column id="fieldStatus"
+                                            caption="msg://fieldStatusName"
+                                            collapsible="false"
+                                            editable="false"
+                                            maximumWidth="75"
+                                            minimumWidth="75"
+                                            property="fieldStatus"
+                                            resizable="false"
+                                            width="75"/>
+                                    <column id="fieldFio"
+                                            caption="msg://fullFioName"
+                                            collapsible="false"
+                                            editable="false"/>
+                                    <column id="fieldPosition"
+                                            editable="false"
+                                            property="position"/>
+                                    <column id="fieldDirectionWork"
+                                            editable="false"
+                                            property="direction_work"/>
+                                    <column id="fieldDateWorkStart"
+                                            property="dateWorkStart"/>
+                                    <column id="fieldDateWorkEnd"
+                                            property="dateWorkEnd"/>
+                                    <column id="fieldPhone"
+                                            caption="msg://phonesName"
+                                            editable="false"
+                                            property="phoneHome"/>
+                                </columns>
+                                <rowsCount/>
+                                <buttonsPanel>
+                                    <button action="dataGridEmployeeCK.add"/>
+                                    <button action="dataGridEmployeeCK.exclude"/>
+                                </buttonsPanel>
+                            </dataGrid>
+                        </groupBox>
+                    </hbox>
+                </vbox>
+            </tab>
+            <tab id="ganttCK"
+                 caption="msg://gantCkNameTab">
+                <chart:ganttChart id="ganttChart"
+                                  additionalSegmentFields="task"
+                                  balloonDateFormat="JJ:NN"
+                                  brightnessStep="7"
+                                  caption="msg://ganttCK"
+                                  categoryField="category"
+                                  colorField="color"
+                                  columnWidth="0.5"
+                                  endDateField="end"
+                                  height="40%"
+                                  marginRight="70"
+                                  period="DAYS"
+                                  rotate="true"
+                                  segmentsField="segments"
+                                  startDate="2016-01-01"
+                                  startDateField="start"
+                                  theme="LIGHT"
+                                  width="100%">
+                    <chart:graph balloonText="&lt;strong&gt;[[task]]&lt;/strong&gt;: [[open]] - [[value]]"
+                                 fillAlphas="1"
+                                 lineAlpha="1"
+                                 lineColor="WHITE"/>
+                    <chart:valueAxis type="DATE"/>
+                    <chart:valueScrollbar autoGridCount="true"
+                                          color="BLACK"/>
+                    <chart:chartCursor cursorAlpha="0"
+                                       cursorColor="#55bb76"
+                                       fullWidth="true"
+                                       valueBalloonsEnabled="false"
+                                       valueLineAlpha="0.5"
+                                       valueLineBalloonEnabled="true"
+                                       valueLineEnabled="true"
+                                       valueZoomable="true"
+                                       zoomable="false"/>
+                    <chart:export/>
+                </chart:ganttChart>
+            </tab>
+        </tabSheet>
+        <frame id="windowActions"
+               screen="editWindowActions"/>
+    </layout>
+</window>
