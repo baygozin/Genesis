@@ -8,3 +8,9 @@ deploy/*
 modules/*/build/*
 out
 test-run
+.idea/
+deploy/
+modules/core/build/
+modules/global/build/
+modules/gui/build/
+modules/web/build/
