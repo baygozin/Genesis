@@ -186,46 +186,58 @@
                  caption="msg://gantCkNameTab"
                  margin="true"
                  spacing="true">
-                <chart:ganttChart id="ganttChart"
-                                  accessible="true"
-                                  additionalSegmentFields="task"
-                                  balloonDateFormat="JJ:NN"
-                                  brightnessStep="7"
-                                  categoryField="category"
-                                  colorField="color"
-                                  columnSpacing="10"
-                                  columnWidth="0.9"
-                                  endDateField="end"
-                                  marginRight="70"
-                                  period="DAYS"
-                                  rotate="true"
-                                  segmentsField="segments"
-                                  startDate="2016-01-01"
-                                  startDateField="start"
-                                  theme="BLACK"
-                                  height="AUTO"
-                                  width="90%">
-                    <chart:graph balloonText="&lt;strong&gt;[[task]]&lt;/strong&gt;: [[open]] - [[value]]"
-                                 fillAlphas="1"
-                                 fixedColumnWidth="24"
-                                 labelPosition="MIDDLE"
-                                 labelText="[[open]]-[[value]]"
-                                 lineAlpha="1"
-                                 lineColor="WHITE"/>
-                    <chart:valueAxis type="DATE"/>
-                    <chart:valueScrollbar autoGridCount="true"
-                                          color="BLACK"/>
-                    <chart:chartCursor cursorAlpha="0"
-                                       cursorColor="#55bb76"
-                                       fullWidth="true"
-                                       valueBalloonsEnabled="false"
-                                       valueLineAlpha="0.5"
-                                       valueLineBalloonEnabled="true"
-                                       valueLineEnabled="true"
-                                       valueZoomable="true"
-                                       zoomable="false"/>
-                    <chart:export/>
-                </chart:ganttChart>
+                <groupBox id="ganttGroupBox"
+                          height="100%"
+                          responsive="true">
+                    <chart:ganttChart id="ganttChart"
+                                      accessible="true"
+                                      additionalSegmentFields="task"
+                                      balloonDateFormat="JJ:NN"
+                                      categoryField="category"
+                                      colorField="color"
+                                      columnSpacing="10"
+                                      columnWidth="0.9"
+                                      endDateField="end"
+                                      marginRight="60"
+                                      period="DAYS"
+                                      rotate="true"
+                                      segmentsField="segments"
+                                      startDateField="start"
+                                      theme="BLACK"
+                                      width="100%">
+                        <chart:graph balloonText="[[task]]"
+                                     fillAlphas="1"
+                                     fixedColumnWidth="24"
+                                     labelPosition="MIDDLE"
+                                     labelText="[[open]]/[[value]]"
+                                     lineAlpha="1"
+                                     lineColor="WHITE">
+                            <chart:labelFunction>
+                                <![CDATA[
+                                    function(item, value) {
+                                        var dateOpen  = new Date(item.values.open);
+                                        var dateValue = new Date(item.values.value);
+                                        return "с " + AmCharts.formatDate(dateOpen, "DD.MM") +
+                                            " по " + AmCharts.formatDate(dateValue, "DD.MM");
+                                    }
+                                ]]>
+                            </chart:labelFunction>
+                        </chart:graph>
+                        <chart:valueAxis type="DATE"/>
+                        <chart:valueScrollbar autoGridCount="true"
+                                              color="BLACK"/>
+                        <chart:chartCursor cursorAlpha="0"
+                                           cursorColor="#55bb76"
+                                           fullWidth="true"
+                                           valueBalloonsEnabled="false"
+                                           valueLineAlpha="0.5"
+                                           valueLineBalloonEnabled="true"
+                                           valueLineEnabled="true"
+                                           valueZoomable="true"
+                                           zoomable="false"/>
+                        <chart:export/>
+                    </chart:ganttChart>
+                </groupBox>
             </tab>
         </tabSheet>
         <frame id="windowActions"
