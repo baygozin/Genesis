@@ -217,8 +217,8 @@
                                     function(item, value) {
                                         var dateOpen  = new Date(item.values.open);
                                         var dateValue = new Date(item.values.value);
-                                        return "с " + AmCharts.formatDate(dateOpen, "DD.MM") +
-                                            " по " + AmCharts.formatDate(dateValue, "DD.MM");
+                                        return AmCharts.formatDate(dateOpen, "DD.MM") +
+                                            " - " + AmCharts.formatDate(dateValue, "DD.MM");
                                     }
                                 ]]>
                             </chart:labelFunction>
