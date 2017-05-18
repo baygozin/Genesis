@@ -40,7 +40,6 @@
                                   height="100%"
                                   spacing="true">
                             <vbox id="vboxData"
-                                  expand="personsTable"
                                   height="100%"
                                   margin="true"
                                   spacing="true">
@@ -77,29 +76,6 @@
                                                visible="false"/>
                                     </column>
                                 </fieldGroup>
-                                <table id="personsTable"
-                                       caption="msg://personsTableName"
-                                       columnControlVisible="false"
-                                       width="100%">
-                                    <actions>
-                                        <action id="create"/>
-                                        <action id="edit"/>
-                                        <action id="remove"/>
-                                    </actions>
-                                    <columns>
-                                        <column id="namePerson"/>
-                                        <column id="positionPerson"/>
-                                        <column id="phonePerson"/>
-                                        <column id="emailPerson"/>
-                                        <column id="notePerson"/>
-                                    </columns>
-                                    <rows datasource="personsDs"/>
-                                    <buttonsPanel>
-                                        <button action="personsTable.create"/>
-                                        <button action="personsTable.edit"/>
-                                        <button action="personsTable.remove"/>
-                                    </buttonsPanel>
-                                </table>
                             </vbox>
                         </groupBox>
                         <vbox id="vboxMap"
@@ -198,14 +174,17 @@
                                       columnSpacing="10"
                                       columnWidth="0.9"
                                       endDateField="end"
+                                      height="100%"
                                       marginRight="60"
                                       period="DAYS"
                                       rotate="true"
                                       segmentsField="segments"
                                       startDateField="start"
+                                      startEffect="EASE_IN_SINE"
                                       theme="BLACK"
                                       width="100%">
                         <chart:graph balloonText="[[task]]"
+                                     dashLength="2"
                                      fillAlphas="1"
                                      fixedColumnWidth="24"
                                      labelPosition="MIDDLE"
@@ -224,7 +203,7 @@
                             </chart:labelFunction>
                         </chart:graph>
                         <chart:valueAxis type="DATE"/>
-                        <chart:valueScrollbar autoGridCount="true"
+                        <chart:valueScrollbar autoGridCount="false"
                                               color="BLACK"/>
                         <chart:chartCursor cursorAlpha="0"
                                            cursorColor="#55bb76"
@@ -237,6 +216,37 @@
                                            zoomable="false"/>
                         <chart:export/>
                     </chart:ganttChart>
+                </groupBox>
+            </tab>
+            <tab id="commonData"
+                 caption="msg://Tab"
+                 margin="true,false,false,false"
+                 spacing="true">
+                <groupBox spacing="true">
+                    <table id="personsTable"
+                           caption="msg://personsTableName"
+                           columnControlVisible="false"
+                           height="100%"
+                           width="100%">
+                        <actions>
+                            <action id="create"/>
+                            <action id="edit"/>
+                            <action id="remove"/>
+                        </actions>
+                        <columns>
+                            <column id="namePerson"/>
+                            <column id="positionPerson"/>
+                            <column id="phonePerson"/>
+                            <column id="emailPerson"/>
+                            <column id="notePerson"/>
+                        </columns>
+                        <rows datasource="personsDs"/>
+                        <buttonsPanel>
+                            <button action="personsTable.create"/>
+                            <button action="personsTable.edit"/>
+                            <button action="personsTable.remove"/>
+                        </buttonsPanel>
+                    </table>
                 </groupBox>
             </tab>
         </tabSheet>
