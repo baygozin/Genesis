@@ -16,14 +16,11 @@ import ru.bov.genesis.entity.mainentity.Building;
 import ru.bov.genesis.entity.mainentity.Employee;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.joda.time.*;
 
-import static ru.bov.genesis.Func.fullFIO;
-import static ru.bov.genesis.Func.shortFIO;
+import static ru.bov.genesis.Func.*;
 
 public class BuildingEdit extends AbstractEditor<Building> {
 
@@ -57,95 +54,58 @@ public class BuildingEdit extends AbstractEditor<Building> {
     @Inject
     private Chart ganttChart;
 
-    private int lengthCalendar; // Ширина отображаемой диаграммы в месяцах
-    private int minusCalc = 0; // Начало расчета сегментов в месяцах от сегодня
-    private int plusCalc = 4; // Конец расчета сегментов в месяцах от сегодня
-    private String colorWork = "#008800";
-    private String colorPause = "#880000";
+    @Inject
+    private DateField fieldDateWorkStart;
 
+    private ListDataProvider fillGantt(List<Employee> employees) {
+        ListDataProvider dataProvider = new ListDataProvider();
+        if (!employees.isEmpty()) {
+            for (Employee employee : employees) {
 
-    // Расчитаем сегменты для диаграммы
-    private List<MapDataItem> calcSegments(LocalDate dateStart,
-                                           LocalDate dateEnd,
-                                           int periodWork,
-                                           int periodPause) {
-        LocalDate now = new LocalDate();
-        LocalDate startCalc = now.minusMonths(minusCalc); // начало расчета сегментов - текущая дата минус "minusCalc"
-        LocalDate stopCalc = now.plusMonths(plusCalc);    // конец расчета сегментов - текущая дата плюс "plusCalc"
-        List<MapDataItem> segments = new ArrayList<>();
-
-        LocalDate start = dateStart;
-        LocalDate stop = dateEnd;
-        for (LocalDate dateI = startCalc; dateI.isBefore(stopCalc); ) {
-            stop = start.plusMonths(periodWork);
-            segments.add(setItemWork(start, stop));
-            start = stop;
-            stop = start.plusMonths(periodPause);
-            segments.add(setItemPause(start.plusDays(1), stop.minusDays(1)));
-            start = stop;
-            dateI = dateI.plusMonths(3);
+                dataProvider.addItem(new MapDataItem(ParamsMap.of("category",
+                        shortFIO(employee.getLastName(), employee.getFirstName(), employee.getMiddleName()),
+                        "segments", calcSegments(employee.getDateWorkStart(), employee.getDateWorkEnd(),
+                                2, 1))));
+            }
         }
-        return segments;
-    }
-
-    private MapDataItem setItemWork(LocalDate start, LocalDate end) {
-        return new MapDataItem(ParamsMap.of("start", start.toString(),
-                "end", end.toString(), "task",
-                "Вахта", "color", colorWork));
-    }
-
-    private MapDataItem setItemPause(LocalDate start, LocalDate end) {
-        return new MapDataItem(ParamsMap.of("start", start.toString(),
-                "end", end.toString(), "task",
-                "Межвахта", "color", colorPause));
+        return dataProvider;
     }
 
     @Override
     public void init(Map<String, Object> params) {
 
-        ListDataProvider dataProvider = new ListDataProvider();
-        List<MapDataItem> segments = new ArrayList<>();
+        // обработка по окончании редактирования строки в таблице сотрудников СК
+        dataGridEmployeeCK.addEditorCloseListener(event -> {
+            employeeCkDs.getItem().setFieldStatus(statusStr(employeeCkDs.getItem(),
+                    employeeCkDs.getItem().getDateWorkStart(),
+                    employeeCkDs.getItem().getDateWorkEnd()));
+            ganttChart.setDataProvider(fillGantt(buildingDs.getItem().getEmployeeCk()));
+        });
+
+        // заполним первоначальные значения графика
         ganttChart.setVisible(false);
         if (!((Building) params.get("ITEM")).getEmployeeCk().isEmpty()) {
             ganttChart.setVisible(true);
-            for (Employee employee : ((Building) params.get("ITEM")).getEmployeeCk()) {
-                dataProvider.addItem(new MapDataItem(ParamsMap.of("category",
-                        shortFIO(employee.getLastName(), employee.getFirstName(), employee.getMiddleName()),
-                        "segments", calcSegments(
-                                new LocalDate(employee.getDateWorkStart()),
-                                new LocalDate(employee.getDateWorkEnd()),
-                                2, 1))));
-            }
         }
+        ganttChart.setDataProvider(fillGantt(((Building) params.get("ITEM")).getEmployeeCk()));
 
-        ganttChart.setDataProvider(dataProvider);
-
-
+        // Настройка карт
         TextField place = (TextField) fieldGroup.getField("place").getComponent();
-        place.addTextChangeListener(new TextInputField.TextChangeListener() {
-            @Override
-            public void textChange(TextInputField.TextChangeEvent event) {
-                Double[] coord = getCoordinates(event.getText());
-                googleMapView.setCenter(googleMapView.createGeoPoint(coord[0], coord[1]));
-            }
-        });
-        googleMapView.addMapClickListener(new MapClickListener() {
-            @Override
-            public void onClick(MapClickEvent event) {
-                Double latitude = event.getPosition().getLatitude();
-                Double longtitude = event.getPosition().getLongitude();
-                String pl1 = String.format("%.6f", latitude).replace(",", ".");
-                String pl2 = String.format("%.6f", longtitude).replace(",", ".");
-                place.setValue(pl1 + ", " + pl2);
-            }
+
+        place.addTextChangeListener(event -> {
+            Double[] coord = getCoordinates(event.getText());
+            googleMapView.setCenter(googleMapView.createGeoPoint(coord[0], coord[1]));
         });
 
-        typeMap.addValueChangeListener(new ValueChangeListener() {
-            @Override
-            public void valueChanged(ValueChangeEvent e) {
-                googleMapView.setMapType(e.getValue().toString());
-            }
+        googleMapView.addMapClickListener(event -> {
+            Double latitude = event.getPosition().getLatitude();
+            Double longtitude = event.getPosition().getLongitude();
+            String pl1 = String.format("%.6f", latitude).replace(",", ".");
+            String pl2 = String.format("%.6f", longtitude).replace(",", ".");
+            place.setValue(pl1 + ", " + pl2);
         });
+
+        typeMap.addValueChangeListener(e -> {googleMapView.setMapType(e.getValue().toString());});
 
         Double[] coord = new Double[2];
         coord = getCoordinates(((Building) params.get("ITEM")).getPlace());
@@ -155,19 +115,20 @@ public class BuildingEdit extends AbstractEditor<Building> {
         googleMapView.setCenter(center);
         googleMapView.setZoom(scale);
 
+        // Настройка таблицы сотрудников группы СК
         dataGridEmployeeCK.setEditorEnabled(true);
         dataGridEmployeeCK.addGeneratedColumn("fieldFio", new DataGrid.ColumnGenerator<Employee, String>() {
             @Override
             public String getValue(DataGrid.ColumnGeneratorEvent<Employee> event) {
                 return fullFIO(event.getItem().getLastName(), event.getItem().getFirstName(), event.getItem().getMiddleName());
             }
-
             @Override
             public Class<String> getType() {
                 return String.class;
             }
         });
 
+        // Цвет статуса сотрудника
         dataGridEmployeeCK.addCellStyleProvider((entity, property) -> {
             if ("fieldStatus".equals(property)) {
                 if (entity != null) {

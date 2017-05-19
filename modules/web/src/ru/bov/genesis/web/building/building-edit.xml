@@ -25,7 +25,7 @@
             spacing="true">
         <tabSheet id="tabSheetBuilding">
             <tab id="tabSheetCommon"
-                 caption="msg://Tab"
+                 caption="msg://commonInfo"
                  margin="true">
                 <hbox id="hboxMap"
                       height="100%"
@@ -51,29 +51,30 @@
                                         <field property="nameShort"
                                                tabIndex="1"/>
                                         <field property="customer"
-                                               rows="2"
+                                               rows="4"
                                                tabIndex="3"/>
                                         <field caption="msg://fieldContractName"
                                                property="contract"
                                                tabIndex="4"/>
+                                        <field property="dateBegin"
+                                               tabIndex="6"/>
+                                        <field property="dateEnd"
+                                               tabIndex="7"/>
                                         <field caption="msg://fieldFileName"
                                                optionsDatasource="imageContractsDs"
                                                property="imageContract"/>
                                     </column>
                                     <column width="250px">
-                                        <field property="nameFull"
+                                        <field caption="msg://fullName"
+                                               property="nameFull"
                                                rows="2"
                                                tabIndex="2"/>
                                         <field property="typeWork"
-                                               rows="2"
+                                               rows="4"
                                                tabIndex="5"/>
-                                        <field property="dateBegin"
-                                               tabIndex="6"/>
-                                        <field property="dateEnd"
-                                               tabIndex="7"/>
-                                        <field property="place"
-                                               tabIndex="8"
-                                               visible="false"/>
+                                        <field caption="msg://placeName"
+                                               property="place"
+                                               tabIndex="8"/>
                                     </column>
                                 </fieldGroup>
                             </vbox>
@@ -164,29 +165,31 @@
                  spacing="true">
                 <groupBox id="ganttGroupBox"
                           height="100%"
-                          responsive="true">
+                          responsive="true"
+                          showAsPanel="true"
+                          spacing="true">
                     <chart:ganttChart id="ganttChart"
                                       accessible="true"
                                       additionalSegmentFields="task"
                                       balloonDateFormat="JJ:NN"
                                       categoryField="category"
                                       colorField="color"
-                                      columnSpacing="10"
-                                      columnWidth="0.9"
+                                      columnSpacing="20"
+                                      columnWidth="1"
                                       endDateField="end"
                                       height="100%"
-                                      marginRight="60"
-                                      period="DAYS"
+                                      marginRight="70"
+                                      period="DD"
                                       rotate="true"
                                       segmentsField="segments"
                                       startDateField="start"
-                                      startEffect="EASE_IN_SINE"
+                                      startEffect="BOUNCE"
                                       theme="BLACK"
                                       width="100%">
                         <chart:graph balloonText="[[task]]"
                                      dashLength="2"
                                      fillAlphas="1"
-                                     fixedColumnWidth="24"
+                                     fixedColumnWidth="20"
                                      labelPosition="MIDDLE"
                                      labelText="[[open]]/[[value]]"
                                      lineAlpha="1"
@@ -195,20 +198,24 @@
                                 <![CDATA[
                                     function(item, value) {
                                         var dateOpen  = new Date(item.values.open);
-                                        var dateValue = new Date(item.values.value);
+                                        var dateClose = new Date(item.values.value);
                                         return AmCharts.formatDate(dateOpen, "DD.MM") +
-                                            " - " + AmCharts.formatDate(dateValue, "DD.MM");
+                                            " - " + AmCharts.formatDate(dateClose, "DD.MM");
                                     }
                                 ]]>
                             </chart:labelFunction>
                         </chart:graph>
-                        <chart:valueAxis type="DATE"/>
+                        <chart:valueAxis type="DATE">
+
+                        </chart:valueAxis>
                         <chart:valueScrollbar autoGridCount="false"
                                               color="BLACK"/>
                         <chart:chartCursor cursorAlpha="0"
-                                           cursorColor="#55bb76"
-                                           fullWidth="true"
+                                           cursorColor="#FFFFFF"
+                                           bulletsEnabled="true"
+                                           fullWidth="false"
                                            valueBalloonsEnabled="false"
+                                           categoryBalloonDateFormat="DD.MM"
                                            valueLineAlpha="0.5"
                                            valueLineBalloonEnabled="true"
                                            valueLineEnabled="true"

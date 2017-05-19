@@ -24,6 +24,9 @@
             <properties include=".*"/>
         </filter>
         <groupTable id="buildingsTable"
+                    multiLineCells="true"
+                    presentations="true"
+                    responsive="true"
                     width="100%">
             <actions>
                 <action id="create"/>
@@ -39,7 +42,8 @@
                 <column id="dateBegin"/>
                 <column id="dateEnd"/>
             </columns>
-            <rows datasource="buildingsDs"/>
+            <rows datasource="buildingsDs"
+                  rowHeaderMode="ICON"/>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
