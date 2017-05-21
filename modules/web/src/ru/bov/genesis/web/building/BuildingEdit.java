@@ -61,11 +61,13 @@ public class BuildingEdit extends AbstractEditor<Building> {
         ListDataProvider dataProvider = new ListDataProvider();
         if (!employees.isEmpty()) {
             for (Employee employee : employees) {
+                if (employee.getDateWorkStart() != null)
+                if (employee.getDateWorkStart() != null)
+                    dataProvider.addItem(new MapDataItem(ParamsMap.of("category",
+                            shortFIO(employee.getLastName(), employee.getFirstName(), employee.getMiddleName()),
+                            "segments", calcSegments(employee.getDateWorkStart(), employee.getDateWorkEnd(),
+                                    2, 1))));
 
-                dataProvider.addItem(new MapDataItem(ParamsMap.of("category",
-                        shortFIO(employee.getLastName(), employee.getFirstName(), employee.getMiddleName()),
-                        "segments", calcSegments(employee.getDateWorkStart(), employee.getDateWorkEnd(),
-                                2, 1))));
             }
         }
         return dataProvider;
@@ -73,6 +75,7 @@ public class BuildingEdit extends AbstractEditor<Building> {
 
     @Override
     public void init(Map<String, Object> params) {
+
 
         // обработка по окончании редактирования строки в таблице сотрудников СК
         dataGridEmployeeCK.addEditorCloseListener(event -> {
@@ -84,10 +87,14 @@ public class BuildingEdit extends AbstractEditor<Building> {
 
         // заполним первоначальные значения графика
         ganttChart.setVisible(false);
-        if (!((Building) params.get("ITEM")).getEmployeeCk().isEmpty()) {
-            ganttChart.setVisible(true);
+        Object test1 = params.get("ITEM");
+        List<Employee> list = ((Building) test1).getEmployeeCk();
+        if (list  != null) {
+            if (!((Building) params.get("ITEM")).getEmployeeCk().isEmpty()) {
+                ganttChart.setVisible(true);
+                ganttChart.setDataProvider(fillGantt(((Building) params.get("ITEM")).getEmployeeCk()));
+            }
         }
-        ganttChart.setDataProvider(fillGantt(((Building) params.get("ITEM")).getEmployeeCk()));
 
         // Настройка карт
         TextField place = (TextField) fieldGroup.getField("place").getComponent();
