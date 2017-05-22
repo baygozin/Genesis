@@ -1,23 +1,19 @@
 package ru.bov.genesis.entity.mainentity;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Column;
+import javax.persistence.*;
+
+import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.chile.core.annotations.NamePattern;
 import java.util.Date;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import java.util.List;
-import javax.persistence.OneToMany;
+
 import com.haulmont.chile.core.annotations.Composition;
 import java.util.Set;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.global.DeletePolicy;
 import java.util.Collection;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+
 import ru.bov.genesis.entity.services.Persons;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
@@ -62,13 +58,6 @@ public class Building extends StandardEntity {
     @Column(name = "PLACE_SCALE")
     protected Integer placeScale;
 
-
-
-
-
-
-
-
     @OnDeleteInverse(DeletePolicy.UNLINK)
     @OnDelete(DeletePolicy.UNLINK)
     @OneToMany(mappedBy = "building")
@@ -83,6 +72,42 @@ public class Building extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "IMAGE_CONTRACT_ID")
     protected FileDescriptor imageContract;
+
+    @Column(name = "NUMBER_EMPLOYEE")
+    @MetaProperty(related = "numberEmployee")
+    private Integer numberEmployee;
+
+    @Column(name = "VALUE_WORK")
+    protected Integer valueWork;
+
+    @Column(name = "VALUE_PAUSE")
+    protected Integer valuePause;
+
+    public void setValueWork(Integer valueWork) {
+        this.valueWork = valueWork;
+    }
+
+    public Integer getValueWork() {
+        return valueWork;
+    }
+
+    public void setValuePause(Integer valuePause) {
+        this.valuePause = valuePause;
+    }
+
+    public Integer getValuePause() {
+        return valuePause;
+    }
+
+
+    public Integer getNumberEmployee() {
+        return getEmployeeCk().size();
+    }
+
+    public void setNumberEmployee(Integer numberEmployee) {
+        this.numberEmployee = getEmployeeCk().size();
+    }
+
 
     public void setImageContract(FileDescriptor imageContract) {
         this.imageContract = imageContract;
