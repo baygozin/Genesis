@@ -57,6 +57,11 @@ public class BuildingEdit extends AbstractEditor<Building> {
     @Inject
     private DateField fieldDateWorkStart;
 
+    @Inject
+    private TabSheet tabSheetBuilding;
+    @Inject
+    private TabSheet.Tab ganttCK;
+
     private ListDataProvider fillGantt(List<Employee> employees) {
         ListDataProvider dataProvider = new ListDataProvider();
         if (!employees.isEmpty()) {
@@ -64,13 +69,37 @@ public class BuildingEdit extends AbstractEditor<Building> {
                 if (employee.getDateWorkStart() != null)
                 if (employee.getDateWorkStart() != null)
                     dataProvider.addItem(new MapDataItem(ParamsMap.of("category",
-                            shortFIO(employee.getLastName(), employee.getFirstName(), employee.getMiddleName()),
+                            shortFIO(employee.getLastName(), employee.getFirstName(), employee.getMiddleName()) + " - " +
+                                      employee.getDirection_work().getNameDirecting(),
                             "segments", calcSegments(employee.getDateWorkStart(), employee.getDateWorkEnd(),
                                     2, 1))));
 
             }
         }
         return dataProvider;
+    }
+
+    private List<Employee> sortEmploye(List<Employee> list) {
+        Collections.sort(list, new Comparator<Employee>() {
+            @Override
+            public int compare(Employee o1, Employee o2) {
+                return o1.getDirection_work().getNameDirecting()
+                        .compareTo(o2.getDirection_work().getNameDirecting());
+            }
+        });
+        return list;
+    }
+
+    // функция заполнения графика данными
+    private void dynamicFillGantt(List<Employee> list) {
+        if (list  != null) {
+            list = sortEmploye(list);
+            if (!list.isEmpty()) {
+                ganttChart.setVisible(true);
+                ganttChart.setDataProvider(fillGantt(list));
+                ganttChart.setHeight(String.valueOf((list.size() * 30) + 80) + "px");
+            }
+        }
     }
 
     @Override
@@ -87,14 +116,14 @@ public class BuildingEdit extends AbstractEditor<Building> {
 
         // заполним первоначальные значения графика
         ganttChart.setVisible(false);
-        Object test1 = params.get("ITEM");
-        List<Employee> list = ((Building) test1).getEmployeeCk();
-        if (list  != null) {
-            if (!((Building) params.get("ITEM")).getEmployeeCk().isEmpty()) {
-                ganttChart.setVisible(true);
-                ganttChart.setDataProvider(fillGantt(((Building) params.get("ITEM")).getEmployeeCk()));
-            }
-        }
+        //List<Employee> list = ((Building) params.get("ITEM")).getEmployeeCk();
+        dynamicFillGantt(((Building) params.get("ITEM")).getEmployeeCk());
+        // динамически заполняем график при открытии закладки
+        tabSheetBuilding.addSelectedTabChangeListener(event -> {
+                if (event.getSelectedTab().getName().equals("ganntCK")) {
+                    dynamicFillGantt(buildingDs.getItem().getEmployeeCk());
+                }
+        });
 
         // Настройка карт
         TextField place = (TextField) fieldGroup.getField("place").getComponent();
@@ -124,16 +153,6 @@ public class BuildingEdit extends AbstractEditor<Building> {
 
         // Настройка таблицы сотрудников группы СК
         dataGridEmployeeCK.setEditorEnabled(true);
-        dataGridEmployeeCK.addGeneratedColumn("fieldFio", new DataGrid.ColumnGenerator<Employee, String>() {
-            @Override
-            public String getValue(DataGrid.ColumnGeneratorEvent<Employee> event) {
-                return fullFIO(event.getItem().getLastName(), event.getItem().getFirstName(), event.getItem().getMiddleName());
-            }
-            @Override
-            public Class<String> getType() {
-                return String.class;
-            }
-        });
 
         // Цвет статуса сотрудника
         dataGridEmployeeCK.addCellStyleProvider((entity, property) -> {
