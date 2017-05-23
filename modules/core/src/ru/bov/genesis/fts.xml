@@ -10,13 +10,13 @@
         <entity class="ru.bov.genesis.entity.services.Directing">
             <include re=".*"/>
         </entity>
-        <entity class="ru.bov.genesis.entity.services.Department">
+        <entity class="ru.bov.genesis.entity.services.Department" show="false">
             <include re=".*"/>
         </entity>
-        <entity class="ru.bov.genesis.entity.test.MyPhoto">
+        <entity class="ru.bov.genesis.entity.test.MyPhoto" show="false">
             <include re=".*"/>
         </entity>
-        <entity class="ru.bov.genesis.entity.services.TypeDocuments">
+        <entity class="ru.bov.genesis.entity.services.TypeDocuments" show="false">
             <include re=".*"/>
         </entity>
         <entity class="ru.bov.genesis.entity.mainentity.Employee">
@@ -35,6 +35,9 @@
             <include re=".*"/>
         </entity>
         <entity class="ru.bov.genesis.entity.services.Persons">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.mainentity.Retrospection">
             <include re=".*"/>
         </entity>
     </entities>
