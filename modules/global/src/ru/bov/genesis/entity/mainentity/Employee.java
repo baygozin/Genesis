@@ -1,5 +1,6 @@
 package ru.bov.genesis.entity.mainentity;
 
+import com.haulmont.chile.core.annotations.MetaProperty;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
@@ -23,10 +24,10 @@ import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
+@Listeners("genesis_EmployeeItemListener")
 @NamePattern("%s %s %s %s %s %s %s|lastName,firstName,middleName,position,profession,direction_work,fieldStatus")
 @Table(name = "GENESIS_EMPLOYEE")
 @Entity(name = "genesis$Employee")
-@Listeners("EmployeeItemListener")
 public class Employee extends StandardEntity {
     private static final long serialVersionUID = 4684379642843823654L;
 
@@ -183,8 +184,6 @@ public class Employee extends StandardEntity {
     @Column(name = "VIK_PVK")
     protected String vik_pvk;
 
-
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "VIK_IMAGE_ID")
     protected FileDescriptor vik_image;
@@ -235,9 +234,6 @@ public class Employee extends StandardEntity {
     @OneToMany(mappedBy = "employee")
     protected List<Courses> courses;
 
-    @OnDeleteInverse(DeletePolicy.UNLINK)
-    @OnDelete(DeletePolicy.UNLINK)
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "clear"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BUILDING_ID")
     protected Building building;
@@ -253,9 +249,22 @@ public class Employee extends StandardEntity {
     @Column(name = "DATE_WORK_END")
     protected Date dateWorkEnd;
 
-
     @Column(name = "FIELD_STATUS")
     protected String fieldStatus;
+
+    @Lob
+    @Column(name = "FULL_NAME")
+    @MetaProperty(related = "lastName")
+    private String fullName;
+
+    public String getFullName() {
+        return getLastName() + " " + getFirstName() + " " + getMiddleName();
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = getLastName() + " " + getFirstName() + " " + getMiddleName();
+    }
+
 
     public void setFieldStatus(String fieldStatus) {
         this.fieldStatus = fieldStatus;
@@ -292,9 +301,6 @@ public class Employee extends StandardEntity {
     }
 
 
-    public void setBuilding(Building building) {
-        this.building = building;
-    }
 
     public Building getBuilding() {
         return building;
