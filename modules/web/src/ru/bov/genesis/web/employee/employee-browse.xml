@@ -4,7 +4,8 @@
         class="ru.bov.genesis.web.employee.EmployeeBrowse"
         focusComponent="employeesTable"
         lookupComponent="employeesTable"
-        messagesPack="ru.bov.genesis.web.employee">
+        messagesPack="ru.bov.genesis.web.employee"
+        xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
     <dsContext>
         <groupDatasource id="employeesDs"
                          class="ru.bov.genesis.entity.mainentity.Employee"
@@ -20,16 +21,25 @@
             spacing="true">
         <filter id="filter"
                 applyTo="employeesTable"
-                datasource="employeesDs">
+                collapsed="true"
+                datasource="employeesDs"
+                defaultMode="fts"
+                modeSwitchVisible="false"
+                useMaxResults="false">
             <properties include=".*"/>
         </filter>
         <groupTable id="employeesTable"
                     editable="true"
+                    multiLineCells="true"
+                    multiselect="true"
+                    presentations="true"
+                    responsive="true"
                     width="100%">
             <actions>
                 <action id="create"/>
                 <action id="edit"/>
                 <action id="remove"/>
+                <action id="excel"/>
             </actions>
             <columns>
                 <column id="fieldStatus"
@@ -37,11 +47,10 @@
                         caption="msg://fieldStatusName"
                         width="70"/>
                 <column id="fullName"
-                        caption="msg://columnFIOname"
-                        generator="generateFullNameCell"/>
+                        caption="msg://columnFIOname"/>
+                <column id="direction_work"/>
                 <column id="building"/>
                 <column id="position"/>
-                <column id="direction_work"/>
                 <column id="profession"/>
                 <column id="phoneMobile"
                         caption="msg://phoneColName"/>
@@ -60,6 +69,8 @@
                         action="employeesTable.edit"/>
                 <button id="removeBtn"
                         action="employeesTable.remove"/>
+                <button id="excelBtn"
+                        action="employeesTable.excel"/>
             </buttonsPanel>
         </groupTable>
     </layout>
