@@ -8,10 +8,16 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.export.ExportDisplay;
 import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
+import com.haulmont.cuba.web.gui.components.WebComponentsHelper;
 import com.haulmont.cuba.web.theme.HaloTheme;
+import com.vaadin.server.Sizeable;
+import com.vaadin.ui.ComponentContainer;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.Years;
+import org.tltv.gantt.Gantt;
+import org.tltv.gantt.client.shared.Resolution;
+import org.tltv.gantt.client.shared.Step;
 import ru.bov.genesis.entity.mainentity.Employee;
 import ru.bov.genesis.entity.services.StorageFiles;
 
@@ -19,15 +25,15 @@ import javax.ejb.Local;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.ByteArrayInputStream;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ru.bov.genesis.ToolsFunc.checkDateExpireTwoMonth;
 import static ru.bov.genesis.utils.GlobalTools.fullFIO;
 
 public class EmployeeEdit extends AbstractEditor<Employee> {
+
+    @Inject
+    private GroupBoxLayout groupBoxCalendar;
 
     @Inject
     private DateField udCkDateExpire;
@@ -77,11 +83,16 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
     @Inject
     private CheckBox freeEmployeeField;
 
+    private Gantt gantt;
+
 
     @Override
     public void init(Map<String, Object> params) {
         super.init(params);
 
+        createGantt();
+        ComponentContainer cc = (ComponentContainer) WebComponentsHelper.unwrap(groupBoxCalendar);
+        cc.addComponent(gantt);
 
         udCkDateExpire.setStyleName(checkDateExpireTwoMonth(((Employee) params.get("ITEM")).getUdCkExpire()));
 
@@ -192,4 +203,34 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
     public void changeDateAction() {
         showNotification("Hello!", NotificationType.TRAY);
     }
+
+    private void createGantt() {
+        gantt = new Gantt();
+
+        gantt.setWidth(100, Sizeable.Unit.PERCENTAGE);
+        gantt.setHeight(500, Sizeable.Unit.PIXELS);
+        gantt.setResizableSteps(true);
+        gantt.setMovableSteps(true);
+        gantt.setLocale(Locale.forLanguageTag("ru"));
+        gantt.setResolution(Resolution.Week);
+        //gantt.setDescription("График вахт");
+
+        gantt.setStartDate(LocalDate.now().minusMonths(6).toDate());
+        gantt.setEndDate(LocalDate.now().plusMonths(6).toDate());
+
+        Step step1 = new Step("Первый шаг");
+        step1.setStartDate(LocalDate.now().minusMonths(1).toDate());
+        step1.setEndDate(LocalDate.now().plusMonths(1).toDate());
+        step1.setDescription("");
+        gantt.addStep(step1);
+
+        Step step2 = new Step("Второй шаг");
+        step2.setStartDate(LocalDate.now().toDate());
+        step2.setEndDate(LocalDate.now().plusMonths(2).toDate());
+        step2.setDescription("Проверка компонента Gantt");
+        gantt.addStep(step2);
+
+    }
+
+
 }
