@@ -8,6 +8,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.export.ExportDisplay;
 import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
+import com.haulmont.cuba.web.theme.HaloTheme;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.Years;
@@ -18,15 +19,19 @@ import javax.ejb.Local;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.ByteArrayInputStream;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
+import static ru.bov.genesis.ToolsFunc.checkDateExpireTwoMonth;
 import static ru.bov.genesis.utils.GlobalTools.fullFIO;
 
 public class EmployeeEdit extends AbstractEditor<Employee> {
 
     @Inject
     private DateField udCkDateExpire;
+
     @Inject
     private Embedded imagePhoto;
 
@@ -78,6 +83,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         super.init(params);
 
 
+        udCkDateExpire.setStyleName(checkDateExpireTwoMonth(((Employee) params.get("ITEM")).getUdCkExpire()));
 
         if (((Employee) params.get("ITEM")).getBuilding() == null) {
             labelStatus.setValue(", не закреплен за объектом");
@@ -112,6 +118,38 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
                 + "</div></h1>";
         labelFio.setValue(fio);
 
+    }
+
+    @Override
+    protected void postInit() {
+        super.postInit();
+        checkAllAteFields();
+    }
+
+    private void checkAllAteFields() {
+        Collection<Component> components = this.getComponents();
+        for (Component component : components) {
+            String className = component.getClass().getCanonicalName();
+            if (className.contains("DateField")) {
+                String style = checkDateExpireTwoMonth(((DateField)component).getValue());
+                component.setStyleName(style);
+            } else if (className.contains("FieldGroup")) {
+                List<FieldGroup.FieldConfig> list = ((FieldGroup) component).getFields();
+                for (FieldGroup.FieldConfig fieldConfig : list) {
+                    String classComp = fieldConfig.getComponent().getClass().getCanonicalName();
+                    Component dateField = fieldConfig.getComponent();
+                    if (dateField != null && classComp.contains("DateField")) {
+                        if (!fieldConfig.getId().equals("birthDay")
+                                && !fieldConfig.getId().equals("employmentDate")
+                                && !fieldConfig.getId().equals("contractDate")
+                                && !fieldConfig.getId().equals("dateAddresRegistration")) {
+                            String style = checkDateExpireTwoMonth(((DateField) dateField).getValue());
+                            dateField.setStyleName(style);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void loadImage(Embedded image, FileDescriptor imageFile) {
@@ -151,4 +189,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         return String.valueOf(years.getYears());
     }
 
+    public void changeDateAction() {
+        showNotification("Hello!", NotificationType.TRAY);
+    }
 }
