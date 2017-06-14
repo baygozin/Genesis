@@ -9,19 +9,18 @@ import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.export.ExportDisplay;
 import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
 import com.haulmont.cuba.web.gui.components.WebComponentsHelper;
-import com.haulmont.cuba.web.theme.HaloTheme;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.ComponentContainer;
 import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.joda.time.Years;
 import org.tltv.gantt.Gantt;
 import org.tltv.gantt.client.shared.Resolution;
 import org.tltv.gantt.client.shared.Step;
+import org.tltv.gantt.client.shared.SubStep;
 import ru.bov.genesis.entity.mainentity.Employee;
 import ru.bov.genesis.entity.services.StorageFiles;
+import ru.bov.genesis.BovStep;
 
-import javax.ejb.Local;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.ByteArrayInputStream;
@@ -31,6 +30,13 @@ import static ru.bov.genesis.ToolsFunc.checkDateExpireTwoMonth;
 import static ru.bov.genesis.utils.GlobalTools.fullFIO;
 
 public class EmployeeEdit extends AbstractEditor<Employee> {
+
+    @Inject
+    private DateField dateFieldStart;
+    @Inject
+    private DateField dateFieldEnd;
+    @Inject
+    private LookupField lookupPeriodStep;
 
     @Inject
     private GroupBoxLayout groupBoxCalendar;
@@ -124,10 +130,30 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
 
         String fio = "<h1><div align=\"center\">" +
                 fullFIO(((Employee) params.get("ITEM")).getLastName(),
-                ((Employee) params.get("ITEM")).getFirstName(),
-                ((Employee) params.get("ITEM")).getMiddleName())
+                        ((Employee) params.get("ITEM")).getFirstName(),
+                        ((Employee) params.get("ITEM")).getMiddleName())
                 + "</div></h1>";
         labelFio.setValue(fio);
+
+        dateFieldStart.addValueChangeListener(e -> {
+            if (e.getValue() != null)
+                gantt.setStartDate((Date) e.getValue());
+        });
+        dateFieldEnd.addValueChangeListener(e -> {
+            if (e.getValue() != null)
+                gantt.setEndDate((Date) e.getValue());
+        });
+
+        lookupPeriodStep.addValueChangeListener(e -> {
+            if (e.getValue() != null) {
+                String value = e.getValue().toString();
+                if (value.equals("day")) {
+                    gantt.setResolution(Resolution.Day);
+                } else if (value.equals("week")) {
+                    gantt.setResolution(Resolution.Week);
+                }
+            }
+        });
 
     }
 
@@ -142,8 +168,12 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         for (Component component : components) {
             String className = component.getClass().getCanonicalName();
             if (className.contains("DateField")) {
-                String style = checkDateExpireTwoMonth(((DateField)component).getValue());
-                component.setStyleName(style);
+                String nameComponent = component.getId();
+                if (!component.getId().equals("dateFieldStart")
+                        && !component.getId().equals("dateFieldEnd")) {
+                    String style = checkDateExpireTwoMonth(((DateField) component).getValue());
+                    component.setStyleName(style);
+                }
             } else if (className.contains("FieldGroup")) {
                 List<FieldGroup.FieldConfig> list = ((FieldGroup) component).getFields();
                 for (FieldGroup.FieldConfig fieldConfig : list) {
@@ -190,8 +220,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
 
     public Component ageManFunction(Datasource datasource, String fieldId) {
         Label age = componentsFactory.createComponent(Label.class);
-        //age.setDatasource(datasource, fieldId);
-		return age;
+        return age;
     }
 
     public String getAgeMan(Date birthday) {
@@ -208,28 +237,46 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         gantt = new Gantt();
 
         gantt.setWidth(100, Sizeable.Unit.PERCENTAGE);
-        gantt.setHeight(500, Sizeable.Unit.PIXELS);
+        gantt.setHeight(100, Sizeable.Unit.PIXELS);
         gantt.setResizableSteps(true);
         gantt.setMovableSteps(true);
         gantt.setLocale(Locale.forLanguageTag("ru"));
         gantt.setResolution(Resolution.Week);
-        //gantt.setDescription("График вахт");
+        Date startDate = LocalDate.now().toDate();
+        Date endDate = LocalDate.now().plusYears(1).toDate();
+        gantt.setStartDate(startDate);
+        gantt.setEndDate(endDate);
+        dateFieldStart.setValue(startDate);
+        dateFieldEnd.setValue(endDate);
 
-        gantt.setStartDate(LocalDate.now().minusMonths(6).toDate());
-        gantt.setEndDate(LocalDate.now().plusMonths(6).toDate());
+        Step step = new Step();
+        step.setStartDate(LocalDate.now().minusMonths(1).toDate());
+        step.setEndDate(LocalDate.now().plusMonths(1).toDate());
+        step.setDescription("");
 
-        Step step1 = new Step("Первый шаг");
-        step1.setStartDate(LocalDate.now().minusMonths(1).toDate());
-        step1.setEndDate(LocalDate.now().plusMonths(1).toDate());
-        step1.setDescription("");
-        gantt.addStep(step1);
+        SubStep subStep_1 = new SubStep("Вахта 1");
+        subStep_1.setStartDate(LocalDate.now().minusMonths(1).toDate());
+        subStep_1.setEndDate(LocalDate.now().plusMonths(1).toDate());
+        subStep_1.setDescription("");
+        SubStep subStep_2 = new SubStep("Вахта 2");
+        subStep_2.setStartDate(LocalDate.now().plusMonths(2).toDate());
+        subStep_2.setEndDate(LocalDate.now().plusMonths(4).toDate());
+        subStep_2.setDescription("");
+        SubStep subStep_3 = new SubStep("Вахта 3");
+        subStep_3.setStartDate(LocalDate.now().plusMonths(5).toDate());
+        subStep_3.setEndDate(LocalDate.now().plusMonths(7).toDate());
+        subStep_3.setDescription("");
 
-        Step step2 = new Step("Второй шаг");
-        step2.setStartDate(LocalDate.now().toDate());
-        step2.setEndDate(LocalDate.now().plusMonths(2).toDate());
-        step2.setDescription("Проверка компонента Gantt");
-        gantt.addStep(step2);
+        step.addSubStep(subStep_1);
+        step.addSubStep(subStep_2);
+        step.addSubStep(subStep_3);
 
+        gantt.addStep(step);
+
+//        gantt.addMoveListener(e -> {
+//        });
+//        gantt.addResizeListener(e -> {
+//        });
     }
 
 
