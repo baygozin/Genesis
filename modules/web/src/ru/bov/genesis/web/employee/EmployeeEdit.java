@@ -11,6 +11,7 @@ import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
 import com.haulmont.cuba.web.gui.components.WebComponentsHelper;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.ComponentContainer;
+import org.hibernate.validator.internal.util.privilegedactions.GetAnnotationParameter;
 import org.joda.time.LocalDate;
 import org.joda.time.Years;
 import org.tltv.gantt.Gantt;
@@ -91,7 +92,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
     private CheckBox freeEmployeeField;
 
     private Gantt gantt;
-
+    private String colorstep = "00BB00";
 
     @Override
     public void init(Map<String, Object> params) {
@@ -145,15 +146,16 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
                 gantt.setEndDate((Date) e.getValue());
         });
 
-        lookupPeriodStep.setNullOption(GanttResolutionEnum.day);
+        lookupPeriodStep.setValue(GanttResolutionEnum.day);
         lookupPeriodStep.addValueChangeListener(e -> {
             if (e.getValue() != null) {
-                gantt.setResolution(Resolution.Week);
-            } else {
-                gantt.setResolution(Resolution.Day);
+                if (e.getValue().equals(GanttResolutionEnum.week)) {
+                    gantt.setResolution(Resolution.Week);
+                } else if (e.getValue().equals(GanttResolutionEnum.day)) {
+                    gantt.setResolution(Resolution.Day);
+                }
             }
         });
-
     }
 
     @Override
@@ -257,14 +259,17 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         subStep_1.setStartDate(LocalDate.now().minusMonths(1).toDate());
         subStep_1.setEndDate(LocalDate.now().plusMonths(1).toDate());
         subStep_1.setDescription("");
+        subStep_1.setBackgroundColor(colorstep);
         SubStep subStep_2 = new SubStep("Вахта 2");
         subStep_2.setStartDate(LocalDate.now().plusMonths(2).toDate());
         subStep_2.setEndDate(LocalDate.now().plusMonths(4).toDate());
         subStep_2.setDescription("");
+        subStep_2.setBackgroundColor(colorstep);
         SubStep subStep_3 = new SubStep("Вахта 3");
         subStep_3.setStartDate(LocalDate.now().plusMonths(5).toDate());
         subStep_3.setEndDate(LocalDate.now().plusMonths(7).toDate());
         subStep_3.setDescription("");
+        subStep_3.setBackgroundColor(colorstep);
 
         step.addSubStep(subStep_1);
         step.addSubStep(subStep_2);
@@ -272,10 +277,11 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
 
         gantt.addStep(step);
 
-//        gantt.addMoveListener(e -> {
-//        });
-//        gantt.addResizeListener(e -> {
-//        });
+        gantt.addMoveListener(e -> {
+
+        });
+        gantt.addResizeListener(e -> {
+        });
     }
 
 
