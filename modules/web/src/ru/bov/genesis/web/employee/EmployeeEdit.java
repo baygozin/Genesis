@@ -17,6 +17,7 @@ import org.tltv.gantt.Gantt;
 import org.tltv.gantt.client.shared.Resolution;
 import org.tltv.gantt.client.shared.Step;
 import org.tltv.gantt.client.shared.SubStep;
+import ru.bov.genesis.entity.GanttResolutionEnum;
 import ru.bov.genesis.entity.mainentity.Employee;
 import ru.bov.genesis.entity.services.StorageFiles;
 import ru.bov.genesis.BovStep;
@@ -144,14 +145,12 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
                 gantt.setEndDate((Date) e.getValue());
         });
 
+        lookupPeriodStep.setNullOption(GanttResolutionEnum.day);
         lookupPeriodStep.addValueChangeListener(e -> {
             if (e.getValue() != null) {
-                String value = e.getValue().toString();
-                if (value.equals("day")) {
-                    gantt.setResolution(Resolution.Day);
-                } else if (value.equals("week")) {
-                    gantt.setResolution(Resolution.Week);
-                }
+                gantt.setResolution(Resolution.Week);
+            } else {
+                gantt.setResolution(Resolution.Day);
             }
         });
 
@@ -241,7 +240,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         gantt.setResizableSteps(true);
         gantt.setMovableSteps(true);
         gantt.setLocale(Locale.forLanguageTag("ru"));
-        gantt.setResolution(Resolution.Week);
+        gantt.setResolution(Resolution.Day);
         Date startDate = LocalDate.now().toDate();
         Date endDate = LocalDate.now().plusYears(1).toDate();
         gantt.setStartDate(startDate);
