@@ -3,25 +3,35 @@ package ru.bov.genesis.web.employee;
 import com.haulmont.cuba.core.app.FileStorageService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FileStorageException;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.WindowManager;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.CreateAction;
+import com.haulmont.cuba.gui.components.actions.EditAction;
+import com.haulmont.cuba.gui.components.actions.RemoveAction;
+import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.export.ExportDisplay;
 import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
 import com.haulmont.cuba.web.gui.components.WebComponentsHelper;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.ComponentContainer;
-import org.hibernate.validator.internal.util.privilegedactions.GetAnnotationParameter;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.Period;
 import org.joda.time.Years;
 import org.tltv.gantt.Gantt;
+import org.tltv.gantt.client.shared.AbstractStep;
 import org.tltv.gantt.client.shared.Resolution;
 import org.tltv.gantt.client.shared.Step;
 import org.tltv.gantt.client.shared.SubStep;
 import ru.bov.genesis.entity.GanttResolutionEnum;
 import ru.bov.genesis.entity.mainentity.Employee;
+import ru.bov.genesis.entity.mainentity.Event;
+import ru.bov.genesis.entity.services.StausEmployeeEnum;
 import ru.bov.genesis.entity.services.StorageFiles;
-import ru.bov.genesis.BovStep;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,10 +39,12 @@ import java.io.ByteArrayInputStream;
 import java.util.*;
 
 import static ru.bov.genesis.ToolsFunc.checkDateExpireTwoMonth;
-import static ru.bov.genesis.utils.GlobalTools.fullFIO;
+import static ru.bov.genesis.utils.GlobalTools.*;
 
 public class EmployeeEdit extends AbstractEditor<Employee> {
 
+    @Inject
+    private DataManager dm;
     @Inject
     private DateField dateFieldStart;
     @Inject
@@ -54,6 +66,10 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
 
     @Inject
     private Datasource<Employee> employeeDs;
+    @Inject
+    private CollectionDatasource eventsDs;
+    @Inject
+    private DataGrid<Event> eventDataGrid;
 
     @Inject
     private FileStorageService fileStorageService;
@@ -91,8 +107,22 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
     @Inject
     private CheckBox freeEmployeeField;
 
+    @Inject
+    private Metadata metadata;
+
+    @Named("eventDataGrid.edit")
+    private EditAction eventTableEdit;
+    @Named("eventDataGrid.create")
+    private CreateAction eventTableCreate;
+    @Named("eventDataGrid.remove")
+    private RemoveAction eventTableRemove;
+
     private Gantt gantt;
-    private String colorstep = "00BB00";
+    private String color_step = "00EE00";
+    private String color_work = "00EE00";
+    private String color_pause = "EE0000";
+
+    private StausEmployeeEnum statusEnum;
 
     @Override
     public void init(Map<String, Object> params) {
@@ -146,7 +176,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
                 gantt.setEndDate((Date) e.getValue());
         });
 
-        lookupPeriodStep.setValue(GanttResolutionEnum.day);
+        lookupPeriodStep.setValue(GanttResolutionEnum.week);
         lookupPeriodStep.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 if (e.getValue().equals(GanttResolutionEnum.week)) {
@@ -156,15 +186,82 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
                 }
             }
         });
+
+        eventsDs.addItemPropertyChangeListener(event -> {
+            System.out.println("Коммит......");
+            //employeeDs.commit();
+            fillGant(employeeDs.getItem().getEvent());
+        });
+
+        eventsDs.addCollectionChangeListener(e -> {
+            if (e.getItems().size() == 0) return;
+            fillGant(employeeDs.getItem().getEvent());
+        });
+
+        // Добавление-Редактирование-Удаление событий
+        eventTableCreate.setBeforeActionPerformedHandler(() -> {
+            Period periodWork;
+            Period periodPause;
+            Map<String, Object> values = new HashMap<>();
+            List<Event> events = getItem().getEvent();
+            if (getItem().getBuilding() == null) {
+                periodWork = getPeriodFromRuString("2М");
+                periodPause = getPeriodFromRuString("1М");
+            } else {
+                periodWork = getPeriodFromRuString(getItem().getBuilding().getPeriodWork());
+                periodPause = getPeriodFromRuString(getItem().getBuilding().getPeriodPause());
+            }
+            if (events.size() == 0) {
+                Date start = DateTime.now().toDate();
+                values.put("startEvent", start);
+                values.put("stopEvent", DateTime.now().plus(periodWork).toDate());
+                values.put("description", "Вахта");
+                values.put("status", StausEmployeeEnum.fromId("1"));
+                values.put("object", employeeDs.getItem().getBuilding());
+                eventTableCreate.setInitialValues(values);
+            } else {
+                events.sort(new Comparator<Event>() {
+                    @Override
+                    public int compare(Event o1, Event o2) {
+                        return o1.getStopEvent().compareTo(o2.getStopEvent());
+                    }
+                });
+                Date start = events.get(events.size() - 1).getStopEvent();
+                Date stop = new DateTime(start).plusMonths(1).toDate();
+                values.put("startEvent", start);
+                values.put("object", getItem().getBuilding());
+                if (events.get(events.size() - 1).getStatus() == StausEmployeeEnum.fromId("1")) {
+                    values.put("stopEvent", new DateTime(start).plus(periodPause).toDate());
+                    values.put("description", "Межвахта");
+                    values.put("status", StausEmployeeEnum.fromId("2"));
+                } else if (events.get(events.size() - 1).getStatus() == StausEmployeeEnum.fromId("2")) {
+                    values.put("stopEvent", new DateTime(start).plus(periodWork).toDate());
+                    values.put("description", "Вахта");
+                    values.put("status", StausEmployeeEnum.fromId("1"));
+                }
+                eventTableCreate.setInitialValues(values);
+            }
+            return true;
+        });
+
+        eventTableCreate.setAfterCommitHandler(entity -> {
+            if (((Event) entity).getObject() != null) {
+                fillGant(employeeDs.getItem().getEvent());
+            }
+        });
+
     }
 
     @Override
     protected void postInit() {
         super.postInit();
-        checkAllAteFields();
+        eventDataGrid.sort("startEvent", DataGrid.SortDirection.DESCENDING);
+        checkAllAgeFields();
+        fillGant(getItem().getEvent());
     }
 
-    private void checkAllAteFields() {
+    // Проверка всех дат на предмет скорого окончания
+    private void checkAllAgeFields() {
         Collection<Component> components = this.getComponents();
         for (Component component : components) {
             String className = component.getClass().getCanonicalName();
@@ -230,59 +327,95 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         return String.valueOf(years.getYears());
     }
 
-    public void changeDateAction() {
-        showNotification("Hello!", NotificationType.TRAY);
+    private void fillGant(List<Event> events) {
+        if (gantt == null) return;
+        if (events == null) return;
+        gantt.removeSteps();
+        List<SubStep> stepList = new ArrayList<>();
+        Step step = new Step("");
+        step.setDescription("");
+        for (Event event : events) {
+            SubStep subStep = new SubStep(event.getDescription());
+            subStep.setStartDate(event.getStartEvent());
+            subStep.setEndDate(event.getStopEvent());
+            if (event.getDescription() != null) {
+                subStep.setDescription(event.getDescription());
+            } else {
+                subStep.setDescription("");
+            }
+            if (event.getStatus() == StausEmployeeEnum.fromId("1")) {
+                subStep.setBackgroundColor(color_work);
+            } else if (event.getStatus() == StausEmployeeEnum.fromId("2")) {
+                subStep.setBackgroundColor(color_pause);
+            }
+            stepList.add(subStep);
+        }
+        step.addSubSteps(stepList);
+        gantt.addStep(step);
     }
 
     private void createGantt() {
         gantt = new Gantt();
-
         gantt.setWidth(100, Sizeable.Unit.PERCENTAGE);
         gantt.setHeight(100, Sizeable.Unit.PIXELS);
-        gantt.setResizableSteps(true);
-        gantt.setMovableSteps(true);
+        gantt.setResizableSteps(false);
+        gantt.setMovableSteps(false);
         gantt.setLocale(Locale.forLanguageTag("ru"));
-        gantt.setResolution(Resolution.Day);
-        Date startDate = LocalDate.now().toDate();
-        Date endDate = LocalDate.now().plusYears(1).toDate();
+        gantt.setResolution(Resolution.Week);
+        Date startDate = LocalDate.now().minusMonths(1).toDate();
+        Date endDate = LocalDate.now().plusMonths(6).toDate();
         gantt.setStartDate(startDate);
         gantt.setEndDate(endDate);
         dateFieldStart.setValue(startDate);
         dateFieldEnd.setValue(endDate);
-
-        Step step = new Step();
-        step.setStartDate(LocalDate.now().minusMonths(1).toDate());
-        step.setEndDate(LocalDate.now().plusMonths(1).toDate());
-        step.setDescription("");
-
-        SubStep subStep_1 = new SubStep("Вахта 1");
-        subStep_1.setStartDate(LocalDate.now().minusMonths(1).toDate());
-        subStep_1.setEndDate(LocalDate.now().plusMonths(1).toDate());
-        subStep_1.setDescription("");
-        subStep_1.setBackgroundColor(colorstep);
-        SubStep subStep_2 = new SubStep("Вахта 2");
-        subStep_2.setStartDate(LocalDate.now().plusMonths(2).toDate());
-        subStep_2.setEndDate(LocalDate.now().plusMonths(4).toDate());
-        subStep_2.setDescription("");
-        subStep_2.setBackgroundColor(colorstep);
-        SubStep subStep_3 = new SubStep("Вахта 3");
-        subStep_3.setStartDate(LocalDate.now().plusMonths(5).toDate());
-        subStep_3.setEndDate(LocalDate.now().plusMonths(7).toDate());
-        subStep_3.setDescription("");
-        subStep_3.setBackgroundColor(colorstep);
-
-        step.addSubStep(subStep_1);
-        step.addSubStep(subStep_2);
-        step.addSubStep(subStep_3);
-
-        gantt.addStep(step);
-
-        gantt.addMoveListener(e -> {
-
+        gantt.addClickListener(e -> {
+            if (e.getDetails().isDoubleClick()) {
+                editEvent(e.getStep());
+            }
         });
-        gantt.addResizeListener(e -> {
-        });
+
     }
 
+//    private void changeMoveEvent(Gantt.MoveEvent e) {
+//        changeEvent(e.getPreviousStartDate(), e.getPreviousEndDate(), e.getStartDate(), e.getEndDate());
+//    }
+//
+//    private void changeResizeEvent(Gantt.ResizeEvent e) {
+//        changeEvent(e.getPreviousStartDate(), e.getPreviousEndDate(), e.getStartDate(), e.getEndDate());
+//    }
+//
+//    private void changeEvent(Long pS, Long pE, Long cS, Long cE) {
+//        Date startPrev = new Date(pS);
+//        Date endPrev = new Date(pE);
+//        Date startNow = new Date(cS);
+//        Date endNow = new Date(cE);
+//        List<Event> events = employeeDs.getItem().getEvent();
+//        for (Event event : events) {
+//            if (event.getStartEvent().equals(startPrev) && event.getStopEvent().equals(endPrev)) {
+//                event.setStartEvent(startNow);
+//                event.setStopEvent(endNow);
+//                eventsDs.setItem(event);
+//                eventsDs.commit();
+//                return;
+//            }
+//        }
+//        //eventsDs.refresh();
+//    }
+
+    private void editEvent(AbstractStep step) {
+        Date start = new Date(step.getStartDate());
+        Date end = new Date(step.getEndDate());
+        List<Event> events = employeeDs.getItem().getEvent();
+        for (Event event : events) {
+            if (event.getStartEvent().equals(start) && event.getStopEvent().equals(end)) {
+                openEditor(event, WindowManager.OpenType.DIALOG).addCloseWithCommitListener(() -> {
+                    //employeeDs.refresh();
+                    fillGant(employeeDs.getItem().getEvent());
+                });
+                return;
+            }
+        }
+        eventsDs.refresh();
+    }
 
 }
