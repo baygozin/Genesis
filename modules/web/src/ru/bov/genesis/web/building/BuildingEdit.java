@@ -7,23 +7,51 @@ import com.haulmont.charts.gui.data.ListDataProvider;
 import com.haulmont.charts.gui.data.MapDataItem;
 import com.haulmont.charts.gui.map.model.GeoPoint;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
-import com.haulmont.cuba.core.global.LoadContext;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.EditAction;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
+import com.haulmont.cuba.gui.data.DsBuilder;
+import com.haulmont.cuba.gui.data.GroupDatasource;
+import com.haulmont.cuba.gui.data.impl.CollectionPropertyDatasourceImpl;
 import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
+import com.haulmont.cuba.web.gui.components.WebComponentsHelper;
+import com.vaadin.server.Sizeable;
+import com.vaadin.ui.ComponentContainer;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.joda.time.Period;
+import org.tltv.gantt.Gantt;
+import org.tltv.gantt.client.shared.Resolution;
+import org.tltv.gantt.client.shared.SubStep;
+import ru.bov.genesis.ToolsFunc;
+import ru.bov.genesis.entity.GanttResolutionEnum;
 import ru.bov.genesis.entity.mainentity.Building;
 import ru.bov.genesis.entity.mainentity.Employee;
+import ru.bov.genesis.entity.mainentity.Event;
 import ru.bov.genesis.entity.services.CellsCk;
+import ru.bov.genesis.entity.services.StausEmployeeEnum;
+import ru.bov.genesis.utils.GlobalTools;
+import ru.bov.genesis.web.BovStep;
+import ru.bov.genesis.web.MainGantt;
+import ru.bov.genesis.web.TableGanttLayout;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.*;
 
-import static ru.bov.genesis.ToolsFunc.*;
+import static ru.bov.genesis.ToolsFunc.calcSegments;
 import static ru.bov.genesis.utils.GlobalTools.*;
 
 public class BuildingEdit extends AbstractEditor<Building> {
+
+    @Inject
+    private DateField dateFieldStart;
+    @Inject
+    private DateField dateFieldEnd;
+    @Inject
+    private LookupField lookupPeriodStep;
 
     @Inject
     private MapViewer googleMapView;
@@ -34,10 +62,20 @@ public class BuildingEdit extends AbstractEditor<Building> {
     private FieldGroup fieldGroup2;
 
     @Inject
+    private VBoxLayout vBoxCalendar;
+
+    @Inject
+    private TabSheet.Tab tabNewGant;
+    @Inject
     private Datasource<Building> buildingDs;
 
     @Inject
-    private Datasource<Employee> employeeCkDs;
+    private CollectionPropertyDatasourceImpl<Employee, UUID> employeeCkDs;
+
+    @Inject
+    private GroupDatasource<Employee, UUID> employeeGroupDs;
+
+    private CollectionDatasource employeeFilterDs;
 
     @Inject
     private LookupField typeMap;
@@ -73,18 +111,31 @@ public class BuildingEdit extends AbstractEditor<Building> {
     private CollectionDatasource<KeyValueEntity, Object> countDirectionDs;
     @Inject
     private Label labelCount;
+    @Inject
+    private Label labelNow;
+    @Inject
+    private LookupField lookupFieldFilter;
+    @Inject
+    private LookupField lookupFieldGantt;
+    @Inject
+    private GroupBoxLayout groupBoxCalendar;
+    @Inject
+    private DataManager dataManager;
+
+    @Inject
+    private GroupBoxLayout groupBoxGantt;
+    private Gantt gantt;
+    private TableGanttLayout ganttLayout;
+
+    @Named("dataGridEmployeeCK.edit")
+    private EditAction todosEmployeeEdit;
 
     // функция заполнения графика данными
-    private void dynamicFillGantt(List<Employee> list, Period periodWork, Period periodPause) {
-        if (list  != null) {
-            list = sortEmploye(list);
-            if (!list.isEmpty()) {
-                ganttChart.setVisible(true);
-                ganttChart.setDataProvider(fillGantt(list, periodWork, periodPause));
-            }
+    private void dynamicNewFillGantt(Collection<Employee> list) {
+        if (list != null && !list.isEmpty()) {
+            fillNewGantt(list);
         }
     }
-
 
     public void refreshCountEmployee(UUID item) {
         String valueCount = "";
@@ -99,86 +150,60 @@ public class BuildingEdit extends AbstractEditor<Building> {
         labelCount.setValue(valueCount);
     }
 
-    private ListDataProvider fillGantt(List<Employee> employees, Period periodWork, Period periodPause) {
-        ListDataProvider dataProvider = new ListDataProvider();
-        if (!employees.isEmpty()) {
-            for (Employee employee : employees) {
-                if (employee.getDateWorkStart() != null && employee.getDateWorkEnd() != null)
-                    dataProvider.addItem(new MapDataItem(ParamsMap.of("category",
-                            shortFIO(employee.getLastName(), employee.getFirstName(), employee.getMiddleName()) + ", " +
-                                      employee.getDirection_work().getNameDirecting().toLowerCase(),
-                            "segments", calcSegments(employee.getDateWorkStart(), employee.getDateWorkEnd(),
-                                    periodWork, periodPause))));
-
-            }
-        }
-        return dataProvider;
-    }
-
-    private List<Employee> sortEmploye(List<Employee> list) {
-        Collections.sort(list, new Comparator<Employee>() {
-            @Override
-            public int compare(Employee o1, Employee o2) {
-                return o1.getDirection_work().getNameDirecting()
-                        .compareTo(o2.getDirection_work().getNameDirecting());
-            }
-        });
-        return list;
-    }
-
     @Override
     public void init(Map<String, Object> params) {
+
+        todosEmployeeEdit.setAfterCommitHandler(entity -> {
+            employeeFilterDs.refresh();
+        });
+
+        employeeFilterDs = new DsBuilder(getDsContext())
+                .setJavaClass(Employee.class)
+                //.setViewName(View.MINIMAL)
+                .setViewName("employee-view")
+                .setId("employeeFilterId")
+                .buildCollectionDatasource();
+
+        employeeFilterDs.addCollectionChangeListener(e -> {
+            if (e.getOperation() == CollectionDatasource.Operation.ADD) {
+//                List<Employee> employeeList = e.getItems();
+//                for (Employee employee : employeeList) {
+//                    employee.setBuilding(buildingDs.getItem());
+//                    buildingDs.getItem().getEmployeeCk().add(employee);
+//                }
+            } else if (e.getOperation() == CollectionDatasource.Operation.REMOVE) {
+
+//                List<Employee> employeeList = e.getItems();
+//                if (buildingDs.getItem().getEmployeeCk().contains(employeeList.get(0))) {
+//                    buildingDs.getItem().getEmployeeCk().removeAll(employeeList);
+//                    for (Employee employee : employeeList) {
+//                        employee.setBuilding(null);
+//                        dataManager.commit(employee);
+//                    }
+//                }
+            }
+            rebuildGroupCk(buildingDs.getItem().getEmployeeCk());
+            fillNewGantt(buildingDs.getItem().getEmployeeCk());
+        });
+
+        labelNow.setValue(LocalDate.now().toString("сегодня d MMMM YYYY года"));
 
         refreshCountEmployee(((Building) params.get("ITEM")).getId());
 
         buildingDs.addItemPropertyChangeListener(new Datasource.ItemPropertyChangeListener<Building>() {
             @Override
             public void itemPropertyChanged(Datasource.ItemPropertyChangeEvent<Building> e) {
-                List<Employee> list = e.getItem().getEmployeeCk();
-                if (e.getProperty().equals("periodWork")) {
-                    dynamicFillGantt(list, getPeriodFromRuString((String) e.getValue()),
-                            getPeriodFromRuString(e.getItem().getPeriodPause()));
-                }
-                if (e.getProperty().equals("periodPause")) {
-                    dynamicFillGantt(list,
-                            getPeriodFromRuString(e.getItem().getPeriodWork()),
-                            getPeriodFromRuString((String) e.getValue()));
-                }
-                if (e.getProperty().equals("periodWork") || e.getProperty().equals("periodPause")) {
-                    rebuildGroupCk(e.getItem().getEmployeeCk());
-                }
+                Collection<Employee> list = e.getItem().getEmployeeCk();
+                rebuildGroupCk(e.getItem().getEmployeeCk());
                 refreshCountEmployee(e.getItem().getId());
             }
         });
 
-        // Пересчитаем вахты в группе СК
+
+        // Перечитаем вахты в группе СК
         rebuildGroupCk(((Building) params.get("ITEM")).getEmployeeCk());
 
-        // обработка по окончании редактирования строки в таблице сотрудников СК
-        dataGridEmployeeCK.addEditorCloseListener(event -> {
-            employeeCkDs.getItem().setFieldStatus(statusStr(employeeCkDs.getItem(),
-                    employeeCkDs.getItem().getDateWorkStart(),
-                    employeeCkDs.getItem().getDateWorkEnd()));
-            dynamicFillGantt(buildingDs.getItem().getEmployeeCk(),
-                    getPeriodFromRuString(buildingDs.getItem().getPeriodWork()),
-                    getPeriodFromRuString(buildingDs.getItem().getPeriodPause()));
-        });
-        // заполним первоначальные значения графика
-        ganttChart.setVisible(false);
-        dynamicFillGantt(((Building) params.get("ITEM")).getEmployeeCk(),
-                getPeriodFromRuString(((Building) params.get("ITEM")).getPeriodWork()),
-                getPeriodFromRuString(((Building) params.get("ITEM")).getPeriodPause()));
-        // динамически заполняем график при открытии закладки
-        tabSheetBuilding.addSelectedTabChangeListener(event -> {
-                if (event.getSelectedTab().getName().equals("ganntCK")) {
-                    dynamicFillGantt(buildingDs.getItem().getEmployeeCk(),
-                            getPeriodFromRuString(buildingDs.getItem().getPeriodWork()),
-                            getPeriodFromRuString(buildingDs.getItem().getPeriodPause()));                }
-        });
-
         // Настройка карт
-        //TextField place = (TextField) fieldGroup2.getField("place").getComponent();
-
         place.addTextChangeListener(event -> {
             Double[] coord = getCoordinates(event.getText());
             googleMapView.setCenter(googleMapView.createGeoPoint(coord[0], coord[1]));
@@ -203,32 +228,182 @@ public class BuildingEdit extends AbstractEditor<Building> {
         googleMapView.setZoom(scale);
 
         // Настройка таблицы сотрудников группы СК
-        dataGridEmployeeCK.setEditorEnabled(true);
+        //dataGridEmployeeCK.setEditorEnabled(false);
 
         // Цвет статуса сотрудника
         dataGridEmployeeCK.addCellStyleProvider((entity, property) -> {
-            if ("fieldStatus".equals(property)) {
                 if (entity != null) {
-                    return returnStatusColor(property, entity);
+                    if (property.equals("fieldStatus")) {
+                        return returnStatusColor(entity);
+                    }
                 }
+                return "";
+        });
+
+        lookupFieldFilter.addValueChangeListener(e -> {
+            if (e.getValue() != null)
+                setEmployeeFiltered(e.getValue().toString());
+            else {
+                setEmployeeFiltered("");
+            };
+            lookupFieldGantt.setValue(e.getValue());
+        });
+
+        lookupFieldGantt.addValueChangeListener(e ->{
+            if (e.getValue() != null) {
+                setEmployeeFiltered(e.getValue().toString());
+            } else {
+                setEmployeeFiltered("");
             }
-            return "default-status";
+            lookupFieldFilter.setValue(e.getValue());
+        });
+        // создаем график работы сотрудников
+        createGantt();
+        ganttLayout = new TableGanttLayout(gantt);
+        ComponentContainer cc = (ComponentContainer) WebComponentsHelper.unwrap(groupBoxGantt);
+        cc.addComponent(ganttLayout);
+        ganttLayout.setHeight(100, Sizeable.Unit.PERCENTAGE);
+        lookupPeriodStep.setValue(GanttResolutionEnum.day);
+        lookupPeriodStep.addValueChangeListener(e -> {
+                if (e.getValue().equals(GanttResolutionEnum.week)) {
+                    gantt.setResolution(Resolution.Week);
+                } else if (e.getValue().equals(GanttResolutionEnum.day)) {
+                    gantt.setResolution(Resolution.Day);
+                }
+        });
+
+        dateFieldStart.addValueChangeListener(e -> {
+            gantt.setStartDate((Date) e.getValue());
+        });
+
+        dateFieldEnd.addValueChangeListener(e -> {
+            gantt.setEndDate((Date) e.getValue());
         });
 
     }
 
-    private void rebuildGroupCk(List<Employee> employeeCk) {
-        if (employeeCk != null) {
-            for (Employee employee : employeeCk) {
-                employee.setFieldStatus(statusStr(employee, employee.getDateWorkStart(), employee.getDateWorkEnd()));
-            }
-        }
+    @Override
+    protected void postInit() {
+        dataGridEmployeeCK.setDatasource(employeeFilterDs);
+        fillCkFilter();
+        fillNewGantt(buildingDs.getItem().getEmployeeCk());
+        setEmployeeFiltered("");
     }
 
     @Override
     protected boolean preCommit() {
         buildingDs.getItem().setPlaceScale(googleMapView.getZoom());
+        employeeFilterDs.refresh();
         return super.preCommit();
+    }
+
+    private void createGantt() {
+        gantt = new MainGantt();
+        gantt.setSizeFull();
+        gantt.setResizableSteps(false);
+        gantt.setMovableSteps(false);
+        gantt.setLocale(Locale.forLanguageTag("ru"));
+        gantt.setResolution(Resolution.Day);
+        Date startDate = LocalDate.now().toDate();
+        Date endDate = LocalDate.now().plusMonths(6).toDate();
+        gantt.setStartDate(startDate);
+        gantt.setEndDate(endDate);
+        dateFieldStart.setValue(startDate);
+        dateFieldEnd.setValue(endDate);
+        gantt.addMoveListener(e -> {
+            //changeEvent(e.getPreviousStartDate(), e.getPreviousEndDate(), e.getStartDate(), e.getEndDate());
+            //showNotification("Перемещение вехи " + e.getStep().getCaption());
+        });
+
+        gantt.addResizeListener(e -> {
+            //changeEvent(e.getPreviousStartDate(), e.getPreviousEndDate(), e.getStartDate(), e.getEndDate());
+            //showNotification("Изменение вехи " + e.getStep().getCaption());
+        });
+
+        gantt.addClickListener(e -> {
+            if (e.getDetails().isDoubleClick()) {
+                //editEvent(e.getStep());
+                showNotification(e.getStep().getCaption() + " <-> " +e.getStep().getDescription() +
+                        " <-> " + e.getStep().getDescription());
+            } else {
+                //showNotification("Одинарный клик на вехе " + e.getStep().getCaption());
+            }
+        });
+    }
+
+    private void fillNewGantt(Collection<Employee> employeeCollection){
+        if (gantt == null) return;
+        if (employeeCollection == null) return;
+        gantt.removeSteps();
+        for (Employee employee : employeeCollection) {
+            BovStep step = new BovStep();
+            employee = dataManager.reload(employee, "employee-view");
+            step.setDescription("");
+            //step.setCaption(employee.getFullName());
+            step.setDescription(employee.getFullName());
+            step.setDirectEmployee(employee.getDirection_work().getNameDirecting());
+            if (employee.getEvent() == null) continue;
+            List<Event> eventList = employee.getEvent();
+            List<SubStep> subStepList = new ArrayList<>();
+            for (Event event : eventList) {
+                SubStep subStep = new SubStep(event.getDescription());
+                subStep.setStartDate(event.getStartEvent());
+                subStep.setEndDate(event.getStopEvent());
+                if (event.getDescription() != null) {
+                    subStep.setDescription(event.getDescription());
+                } else {
+                    subStep.setDescription("");
+                }
+                if (event.getStatus() == StausEmployeeEnum.fromId("1")) {
+                    subStep.setBackgroundColor(ToolsFunc.colorWork);
+                } else if (event.getStatus() == StausEmployeeEnum.fromId("2")) {
+                    subStep.setBackgroundColor(ToolsFunc.colorPause);
+                }
+                subStepList.add(subStep);
+            }
+            step.addSubSteps(subStepList);
+            gantt.addStep(step);
+            ganttLayout.setContainer((Collection) gantt.getSteps());
+        }
+    }
+
+    private void setEmployeeFiltered(String direct) {
+        String qqq;
+        UUID uuid = buildingDs.getItem().getId();
+        if (!direct.isEmpty()) {
+            qqq = "select e from genesis$Employee e " +
+                    "where e.direction_work.nameDirecting = '" + direct +"' and e.building.id = '" + uuid + "'";
+        } else {
+            qqq = "select e from genesis$Employee e " +
+                    "where e.building.id = '" + uuid + "'";
+        }
+        employeeFilterDs.setQuery(qqq);
+        employeeFilterDs.refresh();
+
+        dynamicNewFillGantt(employeeFilterDs.getItems());
+    }
+
+    private void fillCkFilter() {
+        // заполняем простенький фильтр
+        Set<String> listDirect = new HashSet<>();
+        List<Employee> employeeList = buildingDs.getItem().getEmployeeCk();
+        if (employeeList == null) return;
+        for (Employee employee : employeeList) {
+            // Тут сделать проверку на null
+            listDirect.add(employee.getDirection_work().getNameDirecting());
+        }
+        List<String> list = new ArrayList<>();
+        list.addAll(listDirect);
+        lookupFieldFilter.setOptionsList(list);
+        lookupFieldGantt.setOptionsList(list);
+    }
+
+    private void rebuildGroupCk(List<Employee> employeeCk) {
+        if (employeeCk != null) {
+            for (Employee employee : employeeCk) {
+                employee.setFieldStatus(statusStr(employee));
+            }
+        }
     }
 
     public Double[] getCoordinates(String str) {
@@ -245,6 +420,20 @@ public class BuildingEdit extends AbstractEditor<Building> {
             coord[1] = 65.533928;
         }
         return coord;
+    }
+
+    // Возвращает строку со статусом сотрудника
+    public String statusStr(Employee employee) {
+        if (employee.getBuilding() == null) {
+            return "Свободен";
+        }
+        DateTime now = DateTime.now();
+        employee = dataManager.reload(employee, "employee-view");
+        List<Event> events = employee.getEvent();
+        if (events.size() == 0) {
+            return "График не задан";
+        }
+        return GlobalTools.getStrStatus(events);
     }
 
 }
