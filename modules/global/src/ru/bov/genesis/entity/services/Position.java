@@ -5,6 +5,11 @@ import javax.persistence.Table;
 import javax.persistence.Column;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.chile.core.annotations.NamePattern;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import ru.bov.genesis.entity.mainentity.Building;
 
 @NamePattern("%s|namePosition")
 @Table(name = "GENESIS_POSITION")
@@ -14,6 +19,10 @@ public class Position extends StandardEntity {
 
     @Column(name = "NAME_POSITION", unique = true, length = 100)
     protected String namePosition;
+
+
+
+
 
     public void setNamePosition(String namePosition) {
         this.namePosition = namePosition;

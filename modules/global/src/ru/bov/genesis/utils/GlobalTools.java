@@ -1,76 +1,150 @@
 package ru.bov.genesis.utils;
 
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import ru.bov.genesis.entity.mainentity.Employee;
+import ru.bov.genesis.entity.mainentity.Event;
+import ru.bov.genesis.entity.services.StatusEmployeeEnum;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Administrator on 25.05.2017.
  */
 public class GlobalTools {
 
+//    @Inject
+//    private DataManager dataManager;
+
+    private static int plusCalc = 6; // Конец расчета сегментов в месяцах от сегодня
+    public static String colorWork = "work-status";
+    public static String colorPause = "pause-status";
+
+
     public static String alpha = new String("абвгдеёжзиыйклмнопрстуфхцчшщьэюя");
     public static String[] _alpha = {"a", "b", "v", "g", "d", "e", "yo", "g", "z", "i", "y", "i",
             "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "h", "tz", "ch", "sh", "sh", "'", "e", "yu", "ya"};
 
-
-    public static String statusStr(Employee entity, Date start, Date end) {
-        LocalDate localStart = LocalDate.now();
-        LocalDate localEnd = LocalDate.now();
-        if (start != null) localStart = LocalDate.fromDateFields(start);
-        if (end != null) localEnd = LocalDate.fromDateFields(end);
-        if (entity.getBuilding() != null) {
-            if (isWorkMan(localStart, localEnd)) {
-                return "вахта";
-            } else {
-                return "межвахта";
-            }
-        } else {
-            return "свободен";
+    public static Period getPeriodFromRuString(String periodRus) {
+        if (periodRus == null) {
+            periodRus = "1М";
         }
+        String periodJoda = periodRus.toUpperCase()
+                .replace('М','M')
+                .replace('Н','W')
+                .replace('Д','D');
+        periodJoda = "P" + periodJoda;
+        return Period.parse(periodJoda);
     }
 
-    public static boolean isWorkMan(LocalDate start, LocalDate end) {
-        return isJobMan(start, Period.months(2), Period.months(1));
+    // Возвращает строку со статусом сотрудника
+    public static String statusStr(Employee employee) {
+        if (employee.getBuilding() == null) {
+            return "Свободен";
+        }
+        DateTime now = DateTime.now();
 
+        List<Event> events = employee.getEvent();
+        if (events.size() == 0) {
+            return "График не задан";
+        }
+        return getStrStatus(events);
     }
 
-    public static boolean isJobMan(LocalDate start, Period periodV, Period periodM) {
-        LocalDate now = LocalDate.now();
-
-        if (start.isAfter(now))
-            return false; // если тек.дата раньше начала работы то это межвахта однозначно
-        if (start.isBefore(now) && start.plus(periodV).isAfter(now))
-            return true; // если тек.дата в пределах периода работы - вахта
-        if (start.isBefore(now) && start.plus(periodV).isBefore(now)) {
-            for (LocalDate i = start; i.isBefore(now.plusMonths(10)); i = i.plus(periodV).plus(periodM)) {
-                if (i.isBefore(now) && i.plus(periodV).isAfter(now)) {
-                    return true;
-                } else if (i.plus(periodV).isBefore(now) && i.plus(periodV).plus(periodM).isAfter(now)) {
-                    return false;
-                }
+    public static String getStrStatus(List<Event> events) {
+        DateTime now = DateTime.now();
+        for (Event event : events) {
+            DateTime start = new DateTime(event.getStartEvent());
+            DateTime stop = new DateTime(event.getStopEvent());
+            if (now.isAfter(start) && now.isBefore(stop)) {
+                return returnStrStatus(event.getStatus());
             }
         }
-        return false;
+        return "Статус не определен";
     }
 
-    public static String returnStatusColor(String property, Date start, Date end) {
-        LocalDate localStart = LocalDate.now();
-        LocalDate localEnd = LocalDate.now();
-        if (start != null) localStart = LocalDate.fromDateFields(start);
-        if (end != null) localEnd = LocalDate.fromDateFields(end);
+    public static String returnStrStatus(StatusEmployeeEnum status){
+        String stat = "Не определен";
+        if (status == StatusEmployeeEnum.Work) stat = "Вахта";
+        else if (status == StatusEmployeeEnum.Pause) stat = "Межвахта";
+        else if (status == StatusEmployeeEnum.Free) stat = "Свободен";
+        return stat;
+    }
+
+    public static String returnStatusColor(Employee employee) {
+        if (employee.getBuilding() == null) return "default-status";
+        DateTime now = DateTime.now();
+        List<Event> events = employee.getEvent();
+        if (events.size() == 0) return "default-status";
+        for (Event event : events) {
+            DateTime start = new DateTime(event.getStartEvent());
+            DateTime stop = new DateTime(event.getStopEvent());
+            if (now.isAfter(start) && now.isBefore(stop))
+                if (event.getStatus() == StatusEmployeeEnum.Work) return "work-status";
+                else if (event.getStatus() == StatusEmployeeEnum.Pause) return "pause-status";
+        }
+        return "default-status";
+    }
+
+    public static String returnStatusCollorTools(Employee entity, String property) {
         if (property == null) {
-            return "default-status";
+            return "";
         } else if (property.equals("fieldStatus")) {
-            // Вот тут-ещ мы и ....
-            if (isWorkMan(localStart, localEnd)) {
-                return "green-status";
-            } else {
-                return "red-status";
+            return returnStatusColor(entity);
+        } else if (property.equals("expireDateAll")) {
+            return getExpireDate(entity);
+        } else {
+            return "";
+        }
+    }
+
+    // Проверка на истечение срока действия
+    public static String getExpireDate(Employee employee) {
+        int x = 0;
+        List<Date> dateList = new ArrayList<>();
+        dateList.add(employee.getVik_date_expire());
+        dateList.add(employee.getNaks_date_expire());
+        dateList.add(employee.getUdCkExpire());
+        dateList.add(employee.getUdEbExpire());
+        dateList.add(employee.getUdOtExpire());
+        dateList.add(employee.getUdPbExpire());
+        dateList.add(employee.getUdPtmExpire());
+        dateList.add(employee.getUdDriveSafExpire());
+        dateList.add(employee.getUdEcoSafExpire());
+        dateList.add(employee.getUdFirstHelpExpire());
+        dateList.add(employee.getUdWorkHiExpire());
+        dateList.add(employee.getMedicalCheckBaseEnd());
+        dateList.add(employee.getMedicalCheckPeriodicEnd());
+        for (Date date: dateList) {
+            if (date != null) {
+                int expireDate = checkExpire(date, "P2M");
+                if (x < expireDate) x = expireDate;
             }
-        } else return null;
+        }
+        if (x == 1) {
+            return "pink-status";
+        } else if (x == 2) {
+            return "red-status";
+        } else return "";
+    }
+
+    public static int checkExpire(Date date, String expire) {
+        if (date != null) {
+            Period period = Period.parse(expire);
+            LocalDate dateExpire = LocalDate.fromDateFields(date);
+            if (dateExpire.isAfter(LocalDate.now().plus(period))) {
+                return 0;
+            } else if (dateExpire.isBefore(LocalDate.now().plus(period))
+                    && dateExpire.isAfter(LocalDate.now())) {
+                return 1;
+            } else {
+                return 2;
+            }
+        }
+        return 0;
     }
 
     public static String fullFIO(String f, String i, String o) {
@@ -110,6 +184,5 @@ public class GlobalTools {
         }
         return nname.toString();
     }
-
 
 }

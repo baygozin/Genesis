@@ -10,13 +10,12 @@
         <entity class="ru.bov.genesis.entity.services.Directing">
             <include re=".*"/>
         </entity>
-        <entity class="ru.bov.genesis.entity.services.Department" show="false">
+        <entity class="ru.bov.genesis.entity.services.Department"
+                show="false">
             <include re=".*"/>
         </entity>
-        <entity class="ru.bov.genesis.entity.test.MyPhoto" show="false">
-            <include re=".*"/>
-        </entity>
-        <entity class="ru.bov.genesis.entity.services.TypeDocuments" show="false">
+        <entity class="ru.bov.genesis.entity.services.TypeDocuments"
+                show="false">
             <include re=".*"/>
         </entity>
         <entity class="ru.bov.genesis.entity.mainentity.Employee">
@@ -37,7 +36,22 @@
         <entity class="ru.bov.genesis.entity.services.Persons">
             <include re=".*"/>
         </entity>
-        <entity class="ru.bov.genesis.entity.mainentity.Retrospection">
+        <entity class="ru.bov.genesis.entity.services.ManningProperty">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.mainentity.Event">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.mainentity.VacanciesRequest">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.RequestEntity">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.RequestEntityCopy">
+            <include re=".*"/>
+        </entity>
+        <entity class="ru.bov.genesis.entity.mainentity.ClaimCk">
             <include re=".*"/>
         </entity>
     </entities>

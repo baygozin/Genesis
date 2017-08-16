@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <studio>
     <settings>
-        <showInfoOutdatedScheme>false</showInfoOutdatedScheme>
+        <freeDbmsKeywords>NUMBER</freeDbmsKeywords>
+        <freeDbmsKeywords>POSITION</freeDbmsKeywords>
+        <defaultAccessModifier>private</defaultAccessModifier>
+        <hotDeployMapping>modules/global/src:conf/app-core</hotDeployMapping>
+        <hotDeployMapping>modules/core/src:conf/app-core</hotDeployMapping>
+        <hotDeployMapping>modules/global/src:conf/app</hotDeployMapping>
+        <hotDeployMapping>modules/web/src:conf/app</hotDeployMapping>
+        <hotDeployMapping>modules/gui/src:conf/app</hotDeployMapping>
     </settings>
     <screenDesigner>
         <screen module="web"
-                presentSize="1280x1024"
-                reference="ru/bov/genesis/web/building/building-edit.xml"/>
-        <screen module="web"
-                presentSize="1280x1024"
+                presentSize="1920x1080"
                 reference="ru/bov/genesis/web/employee/employee-edit.xml"/>
+        <screen module="web"
+                presentSize="1920x1080"
+                reference="ru/bov/genesis/web/employee/employee-browse.xml"/>
     </screenDesigner>
 </studio>

@@ -22,4 +22,6 @@ public class ExtAppMainWindow extends AbstractMainWindow {
         initLogoImage(logoImage);
         initFtsField(ftsField);
     }
+
+
 }

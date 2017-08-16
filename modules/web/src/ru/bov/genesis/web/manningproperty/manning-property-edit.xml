@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://editorCaption"
+        class="ru.bov.genesis.web.manningproperty.ManningPropertyEdit"
+        datasource="manningPropertyDs"
+        focusComponent="fieldGroup"
+        messagesPack="ru.bov.genesis.web.manningproperty">
+    <dsContext>
+        <datasource id="manningPropertyDs"
+                    class="ru.bov.genesis.entity.services.ManningProperty"
+                    view="_local"/>
+    </dsContext>
+    <dialogMode closeable="true"
+                forceDialog="true"
+                height="300"
+                modal="true"
+                resizable="true"
+                width="600"/>
+    <layout expand="windowActions"
+            spacing="true">
+        <fieldGroup id="fieldGroup"
+                    datasource="manningPropertyDs">
+            <column width="250px">
+                <field property="columnExcel"/>
+                <field property="mainClass"/>
+                <field property="fieldClass"/>
+                <field property="typeField"/>
+                <field property="commentUser"/>
+            </column>
+        </fieldGroup>
+        <frame id="windowActions"
+               screen="editWindowActions"/>
+    </layout>
+</window>

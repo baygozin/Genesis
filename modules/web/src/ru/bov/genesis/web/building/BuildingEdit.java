@@ -1,37 +1,37 @@
 package ru.bov.genesis.web.building;
 
 import com.haulmont.bali.util.ParamsMap;
-import com.haulmont.charts.gui.components.charts.Chart;
 import com.haulmont.charts.gui.components.map.MapViewer;
-import com.haulmont.charts.gui.data.ListDataProvider;
-import com.haulmont.charts.gui.data.MapDataItem;
 import com.haulmont.charts.gui.map.model.GeoPoint;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
+import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.WindowManager;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.actions.AddAction;
 import com.haulmont.cuba.gui.components.actions.EditAction;
+import com.haulmont.cuba.gui.components.actions.ExcludeAction;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.DsBuilder;
-import com.haulmont.cuba.gui.data.GroupDatasource;
-import com.haulmont.cuba.gui.data.impl.CollectionPropertyDatasourceImpl;
+import com.haulmont.cuba.gui.data.HierarchicalDatasource;
 import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
 import com.haulmont.cuba.web.gui.components.WebComponentsHelper;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.ComponentContainer;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.Period;
 import org.tltv.gantt.Gantt;
 import org.tltv.gantt.client.shared.Resolution;
 import org.tltv.gantt.client.shared.SubStep;
-import ru.bov.genesis.ToolsFunc;
+import ru.bov.genesis.web.ToolsFunc;
 import ru.bov.genesis.entity.GanttResolutionEnum;
 import ru.bov.genesis.entity.mainentity.Building;
+import ru.bov.genesis.entity.mainentity.ClaimCk;
 import ru.bov.genesis.entity.mainentity.Employee;
 import ru.bov.genesis.entity.mainentity.Event;
-import ru.bov.genesis.entity.services.CellsCk;
-import ru.bov.genesis.entity.services.StausEmployeeEnum;
+import ru.bov.genesis.entity.services.StatusEmployeeEnum;
 import ru.bov.genesis.utils.GlobalTools;
 import ru.bov.genesis.web.BovStep;
 import ru.bov.genesis.web.MainGantt;
@@ -41,8 +41,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.*;
 
-import static ru.bov.genesis.ToolsFunc.calcSegments;
-import static ru.bov.genesis.utils.GlobalTools.*;
+import static ru.bov.genesis.utils.GlobalTools.returnStatusColor;
 
 public class BuildingEdit extends AbstractEditor<Building> {
 
@@ -62,18 +61,9 @@ public class BuildingEdit extends AbstractEditor<Building> {
     private FieldGroup fieldGroup2;
 
     @Inject
-    private VBoxLayout vBoxCalendar;
-
-    @Inject
-    private TabSheet.Tab tabNewGant;
+    private HierarchicalDatasource<ClaimCk, UUID> claimCkDs;
     @Inject
     private Datasource<Building> buildingDs;
-
-    @Inject
-    private CollectionPropertyDatasourceImpl<Employee, UUID> employeeCkDs;
-
-    @Inject
-    private GroupDatasource<Employee, UUID> employeeGroupDs;
 
     private CollectionDatasource employeeFilterDs;
 
@@ -81,22 +71,10 @@ public class BuildingEdit extends AbstractEditor<Building> {
     private LookupField typeMap;
 
     @Inject
-    private Frame windowActions;
-
-    @Inject
     private ComponentsFactory componentsFactory;
 
     @Inject
-    private Table<Employee> groupCkTable;
-
-    @Inject
     private DataGrid<Employee> dataGridEmployeeCK;
-
-    @Inject
-    private DataGrid<CellsCk> cellsCkDataGrid;
-
-    @Inject
-    private Chart ganttChart;
 
     @Inject
     private DateField fieldDateWorkStart;
@@ -104,11 +82,11 @@ public class BuildingEdit extends AbstractEditor<Building> {
     @Inject
     private TabSheet tabSheetBuilding;
     @Inject
-    private TabSheet.Tab ganttCK;
-    @Inject
     private TextField place;
     @Inject
     private CollectionDatasource<KeyValueEntity, Object> countDirectionDs;
+    @Inject
+    private CollectionDatasource<KeyValueEntity, Object> countDirectionWorkDs;
     @Inject
     private Label labelCount;
     @Inject
@@ -118,17 +96,26 @@ public class BuildingEdit extends AbstractEditor<Building> {
     @Inject
     private LookupField lookupFieldGantt;
     @Inject
-    private GroupBoxLayout groupBoxCalendar;
-    @Inject
     private DataManager dataManager;
-
     @Inject
+
     private GroupBoxLayout groupBoxGantt;
     private Gantt gantt;
     private TableGanttLayout ganttLayout;
 
     @Named("dataGridEmployeeCK.edit")
     private EditAction todosEmployeeEdit;
+    @Named("dataGridEmployeeCK.add")
+    private AddAction todosEmployeeAdd;
+    @Named("dataGridEmployeeCK.exclude")
+    private ExcludeAction todoEmployeeExclude;
+
+    @Inject
+    Metadata metadata;
+    @Inject
+    private TreeTable<ClaimCk> claimCkTable;
+    @Inject
+    private CollectionDatasource<Employee, UUID> employeeCkDs;
 
     // функция заполнения графика данными
     private void dynamicNewFillGantt(Collection<Employee> list) {
@@ -137,10 +124,10 @@ public class BuildingEdit extends AbstractEditor<Building> {
         }
     }
 
+    // Строка с количеством подгрупп специалистов
     public void refreshCountEmployee(UUID item) {
         String valueCount = "";
         countDirectionDs.refresh(ParamsMap.of("id", item));
-
         Collection<KeyValueEntity> valueEntities = countDirectionDs.getItems();
         for (KeyValueEntity valueEntity : valueEntities) {
             String statusField = valueEntity.getValue("directionName");
@@ -150,11 +137,192 @@ public class BuildingEdit extends AbstractEditor<Building> {
         labelCount.setValue(valueCount);
     }
 
+    // Создаем заявку на специалистов
+    public void onCreateClaim() {
+        ClaimCk claimCk = metadata.create(ClaimCk.class);
+        claimCk.setBuilding(getItem());
+        getItem().getClaimCk().add(claimCk);
+        AbstractEditor editor = openEditor("genesis$ClaimCk.edit.copy1", claimCk, WindowManager.OpenType.DIALOG);
+        editor.addCloseListener(actionId -> {
+            ClaimCk ck = (ClaimCk) editor.getItem();
+            if (ck.getClaimDate() == null) claimCkDs.removeItem(ck);
+            claimCkDs.refresh();
+
+        });
+    }
+
+    // Создаем вложенную специальность в заявке
+    public void onCreateSpec() {
+        ClaimCk item = claimCkTable.getSingleSelected();
+        ClaimCk claimCk = metadata.create(ClaimCk.class);
+        if (item != null) {
+            claimCk.setBuilding(getItem());
+            if (item.getParentClaim() == null)
+                claimCk.setParentClaim(item);
+            else
+                claimCk.setParentClaim(item.getParentClaim());
+            getItem().getClaimCk().add(claimCk);
+        }
+        AbstractEditor editor = openEditor("genesis$ClaimCk.edit.copy2", claimCk, WindowManager.OpenType.DIALOG);
+        editor.addCloseListener(actionId -> {
+            ClaimCk ck = (ClaimCk) editor.getItem();
+            if (ck.getSpecialty() == null || ck.getNumberSpeciality() == null) claimCkDs.removeItem(ck);
+            expandTreeTableClaim(claimCkTable, 1);
+            claimCkDs.refresh();
+        });
+    }
+
+    // Удаляем заявку или специальность
+    public void onRemoveClaim() {
+        ClaimCk item = claimCkTable.getSingleSelected();
+        if (item.getParentClaim() == null) {
+            Collection<ClaimCk> claimCkList = claimCkDs.getItems();
+            Collection<ClaimCk> collection = new ArrayList<>();
+            for (ClaimCk claimCk : claimCkList) if (claimCk.getParentClaim() == item) collection.add(claimCk);
+            collection.add(item);
+            for (ClaimCk ck : collection) claimCkDs.removeItem(ck);
+        } else claimCkDs.removeItem(item);
+        claimCkDs.refresh();
+    }
+
+    // Генерация колонки с текущим кол-м сотрудников данной специальности
+    public Component generateNumberCurrentCell(ClaimCk entity) {
+        String numberSpec = "0";
+        Label numberMan = componentsFactory.createComponent(Label.class);
+        List<ClaimCk> ckList = getItem().getClaimCk();
+        Date lastDate = new DateTime().withDate(1, 1, 1).toDate();
+        for (ClaimCk claimCk : ckList) {
+            if (claimCk.getClaimDate() != null && claimCk.getClaimDate().after(lastDate)) {
+                lastDate = claimCk.getClaimDate();
+            }
+        }
+        if (entity.getParentClaim() != null && entity.getParentClaim().getClaimDate().equals(lastDate)) {
+            // тут надо вытянуть из списка Ск количество специалистов
+            countDirectionDs.refresh(ParamsMap.of("id", getItem().getId() ));
+            Collection<KeyValueEntity> valueEntities = countDirectionDs.getItems();
+            for (KeyValueEntity valueEntity : valueEntities) {
+                String currentSpec = entity.getSpecialty().getNameDirecting();
+                String spec = valueEntity.getValue("directionName");
+                Long countField = valueEntity.getValue("directionCount");
+                if (spec.toUpperCase().equals(entity.getSpecialty().getNameDirecting().toUpperCase())) {
+                    numberSpec = String.valueOf(countField);
+                    break;
+                }
+            }
+        }
+        if (entity.getParentClaim() == null) numberSpec = "";
+        if (entity.getParentClaim() != null && !entity.getParentClaim().getClaimDate().equals(lastDate)) numberSpec = "";
+        numberMan.setValue(numberSpec);
+        return numberMan;
+    }
+
+    // Генерация колонки с количеством человек на вахте данной специальности
+    public Component generateNumberWorkCell(ClaimCk entity) {
+        String numberSpec = "0";
+        Label numberMan = componentsFactory.createComponent(Label.class);
+        List<ClaimCk> ckList = getItem().getClaimCk();
+        Date lastDate = new DateTime().withDate(1, 1, 1).toDate();
+        for (ClaimCk claimCk : ckList) { // Находим последнюю заявку
+            if (claimCk.getClaimDate() != null && claimCk.getClaimDate().after(lastDate)) {
+                lastDate = claimCk.getClaimDate();
+            }
+        }
+        if (entity.getParentClaim() != null && entity.getParentClaim().getClaimDate().equals(lastDate)) {
+            // тут надо вытянуть из списка Ск количество специалистов
+            countDirectionWorkDs.refresh(ParamsMap.of(
+                    "id", getItem().getId(),
+                    "direction", entity.getSpecialty().getNameDirecting()));
+            Collection<KeyValueEntity> valueEntities = countDirectionWorkDs.getItems();
+            for (KeyValueEntity valueEntity : valueEntities) {
+                String currentSpec = entity.getSpecialty().getNameDirecting();
+                String spec = valueEntity.getValue("directionName");
+                Long countField = valueEntity.getValue("directionCount");
+                if (spec.toUpperCase().equals(entity.getSpecialty().getNameDirecting().toUpperCase())) {
+                    numberSpec = String.valueOf(countField);
+                    break;
+                }
+            }
+        }
+        if (entity.getParentClaim() == null) numberSpec = "";
+        if (entity.getParentClaim() != null && !entity.getParentClaim().getClaimDate().equals(lastDate)) numberSpec = "";
+
+
+        numberMan.setValue(numberSpec);
+        return numberMan;
+    }
+
+    // Подбор сотрудников
+    public void onRecrutSpec(Component source) {
+        ClaimCk item = claimCkTable.getSingleSelected();
+        if (item != null && item.getParentClaim() == null) {
+            showNotification("Не выбрана специальность");
+            return;
+        }
+        String spec = item.getSpecialty().getNameDirecting();
+        openLookup("genesis$Employee.browse",items -> addEmployeeToGroupCk(items),
+                WindowManager.OpenType.THIS_TAB, ParamsMap.of("directing", spec));
+    }
+
+    // Добавить сотрудника(ов) в группу СК
+    private void addEmployeeToGroupCk(Collection<Employee> items) {
+        if (!items.isEmpty()) {
+            List<Employee> employeeList = new ArrayList<>(items);
+            for (Employee employee : employeeList) {
+                employee.setBuilding(getItem());
+            }
+            getItem().getEmployeeCk().addAll(employeeList);
+            CommitContext commitContext = new CommitContext(getItem().getEmployeeCk());
+            dataManager.commit(commitContext);
+            buildingDs.refresh();
+            employeeFilterDs.refresh();
+            rebuildGroupCk(getItem().getEmployeeCk());
+            fillNewGantt(getItem().getEmployeeCk());
+        }
+    }
+
+    @Override
+    public void ready() {
+        super.ready();
+        expandTreeTableClaim(claimCkTable, 1);
+    }
+
+    private void expandTreeTableClaim(TreeTable treeTable, int expandLevelCount) {
+        treeTable.expand(getLastClaim().getId());
+    }
+
+    private ClaimCk getLastClaim() {
+        List<ClaimCk> ckList = getItem().getClaimCk();
+        ClaimCk lastCk = new ClaimCk();
+        Date lastDate = new DateTime().withDate(1, 1, 1).toDate();
+        for (ClaimCk claimCk : ckList) {
+            if (claimCk.getClaimDate() != null && claimCk.getClaimDate().after(lastDate)) {
+                lastDate = claimCk.getClaimDate();
+                lastCk = claimCk;
+            }
+        }
+        return lastCk;
+    }
+
     @Override
     public void init(Map<String, Object> params) {
 
         todosEmployeeEdit.setAfterCommitHandler(entity -> {
-            employeeFilterDs.refresh();
+            commit();
+        });
+
+        todosEmployeeAdd.setAfterAddHandler(items -> {
+            addEmployeeToGroupCk(items);
+        });
+
+        todoEmployeeExclude.setAfterRemoveHandler(items -> {
+            List<Employee> employeeList = new ArrayList<>(items);
+            for (Employee employee : employeeList) {
+                employee.setBuilding(null);
+            }
+            getItem().getEmployeeCk().removeAll(employeeList);
+            commit();
+            rebuildGroupCk(getItem().getEmployeeCk());
+            fillNewGantt(getItem().getEmployeeCk());
         });
 
         employeeFilterDs = new DsBuilder(getDsContext())
@@ -165,25 +333,8 @@ public class BuildingEdit extends AbstractEditor<Building> {
                 .buildCollectionDatasource();
 
         employeeFilterDs.addCollectionChangeListener(e -> {
-            if (e.getOperation() == CollectionDatasource.Operation.ADD) {
-//                List<Employee> employeeList = e.getItems();
-//                for (Employee employee : employeeList) {
-//                    employee.setBuilding(buildingDs.getItem());
-//                    buildingDs.getItem().getEmployeeCk().add(employee);
-//                }
-            } else if (e.getOperation() == CollectionDatasource.Operation.REMOVE) {
-
-//                List<Employee> employeeList = e.getItems();
-//                if (buildingDs.getItem().getEmployeeCk().contains(employeeList.get(0))) {
-//                    buildingDs.getItem().getEmployeeCk().removeAll(employeeList);
-//                    for (Employee employee : employeeList) {
-//                        employee.setBuilding(null);
-//                        dataManager.commit(employee);
-//                    }
-//                }
-            }
-            rebuildGroupCk(buildingDs.getItem().getEmployeeCk());
-            fillNewGantt(buildingDs.getItem().getEmployeeCk());
+            rebuildGroupCk(getItem().getEmployeeCk());
+            fillNewGantt(getItem().getEmployeeCk());
         });
 
         labelNow.setValue(LocalDate.now().toString("сегодня d MMMM YYYY года"));
@@ -227,9 +378,6 @@ public class BuildingEdit extends AbstractEditor<Building> {
         googleMapView.setCenter(center);
         googleMapView.setZoom(scale);
 
-        // Настройка таблицы сотрудников группы СК
-        //dataGridEmployeeCK.setEditorEnabled(false);
-
         // Цвет статуса сотрудника
         dataGridEmployeeCK.addCellStyleProvider((entity, property) -> {
                 if (entity != null) {
@@ -240,6 +388,7 @@ public class BuildingEdit extends AbstractEditor<Building> {
                 return "";
         });
 
+        // Выбор специальности в группе СК
         lookupFieldFilter.addValueChangeListener(e -> {
             if (e.getValue() != null)
                 setEmployeeFiltered(e.getValue().toString());
@@ -257,6 +406,7 @@ public class BuildingEdit extends AbstractEditor<Building> {
             }
             lookupFieldFilter.setValue(e.getValue());
         });
+
         // создаем график работы сотрудников
         createGantt();
         ganttLayout = new TableGanttLayout(gantt);
@@ -288,12 +438,13 @@ public class BuildingEdit extends AbstractEditor<Building> {
         fillCkFilter();
         fillNewGantt(buildingDs.getItem().getEmployeeCk());
         setEmployeeFiltered("");
+        claimCkTable.sortBy(claimCkTable.getDatasource().getMetaClass().getPropertyPath("claimDate"), false);
     }
 
     @Override
     protected boolean preCommit() {
         buildingDs.getItem().setPlaceScale(googleMapView.getZoom());
-        employeeFilterDs.refresh();
+        //employeeFilterDs.refresh();
         return super.preCommit();
     }
 
@@ -354,9 +505,9 @@ public class BuildingEdit extends AbstractEditor<Building> {
                 } else {
                     subStep.setDescription("");
                 }
-                if (event.getStatus() == StausEmployeeEnum.fromId("1")) {
+                if (event.getStatus() == StatusEmployeeEnum.fromId("1")) {
                     subStep.setBackgroundColor(ToolsFunc.colorWork);
-                } else if (event.getStatus() == StausEmployeeEnum.fromId("2")) {
+                } else if (event.getStatus() == StatusEmployeeEnum.fromId("2")) {
                     subStep.setBackgroundColor(ToolsFunc.colorPause);
                 }
                 subStepList.add(subStep);
@@ -427,13 +578,13 @@ public class BuildingEdit extends AbstractEditor<Building> {
         if (employee.getBuilding() == null) {
             return "Свободен";
         }
-        DateTime now = DateTime.now();
         employee = dataManager.reload(employee, "employee-view");
         List<Event> events = employee.getEvent();
         if (events.size() == 0) {
             return "График не задан";
         }
-        return GlobalTools.getStrStatus(events);
+        String stat = GlobalTools.getStrStatus(events);
+        return stat;
     }
 
 }

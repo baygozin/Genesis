@@ -13,6 +13,7 @@
               width="100%">
             <cssLayout id="sideMenuPanel"
                        height="100%"
+                       margin="true"
                        stylename="c-sidemenu-panel">
                 <button id="mobileMenuButton"
                         caption="mainMsg://app.menu"
@@ -41,6 +42,7 @@
                               stylename="c-app-icon"
                               type="IMAGE"
                               visible="false"/>
+                    <main:timeZoneIndicator id="timeZoneIndicator"/>
                     <main:userIndicator id="userIndicator"
                                         width="100%"/>
                     <hbox id="mainButtonsBox"
@@ -52,12 +54,11 @@
                                            description="mainMsg://logoutBtnDescription"
                                            icon="app/images/exit.png"/>
                     </hbox>
-                    <main:timeZoneIndicator id="timeZoneIndicator"
-                                            width="100%"/>
                     <main:sideMenu id="sideMenu"
                                    sidePanel="sideMenuPanel"
                                    sidePanelToggleButton="mobileMenuButton"/>
                     <main:ftsField id="ftsField"
+                                   visible="false"
                                    width="100%"/>
                 </cssLayout>
             </cssLayout>

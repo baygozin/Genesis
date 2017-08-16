@@ -11,23 +11,70 @@
                          class="ru.bov.genesis.entity.mainentity.Employee"
                          view="employee-view">
             <query>
-                <![CDATA[select e from genesis$Employee e]]>
+                <![CDATA[select e from genesis$Employee e where (e.arhiv is null) or (e.arhiv = 0)]]>
             </query>
         </groupDatasource>
+        <valueCollectionDatasource id="countDs">
+            <query>
+                <![CDATA[
+                        select UPPER(e.fieldStatus) as statusField, count(e.fieldStatus)
+                        from genesis$Employee e
+                        where e.arhiv = false
+                        group by e.fieldStatus
+                        order by e.fieldStatus asc
+                ]]>
+            </query>
+            <properties idProperty="statusField">
+                <property datatype="string"
+                          name="statusField"/>
+                <property datatype="decimal"
+                          name="countField"/>
+            </properties>
+        </valueCollectionDatasource>
+        <valueCollectionDatasource id="countArhivDs">
+            <query>
+                <![CDATA[
+                        select UPPER(e.fieldStatus) as statusField, count(e.fieldStatus)
+                        from genesis$Employee e
+                        where e.arhiv = true
+                        group by e.fieldStatus
+                        order by e.fieldStatus asc
+                ]]>
+            </query>
+            <properties idProperty="statusField">
+                <property datatype="string"
+                          name="statusField"/>
+                <property datatype="decimal"
+                          name="countField"/>
+            </properties>
+        </valueCollectionDatasource>
     </dsContext>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="employeesTable"
             spacing="true">
-        <filter id="filter"
-                applyTo="employeesTable"
-                collapsed="true"
-                datasource="employeesDs"
-                defaultMode="fts"
-                modeSwitchVisible="false"
-                useMaxResults="false">
-            <properties include=".*"/>
-        </filter>
+        <hbox expand="filter"
+              width="100%">
+            <filter id="filter"
+                    applyTo="employeesTable"
+                    collapsed="true"
+                    datasource="employeesDs"
+                    defaultMode="fts"
+                    folderActionsEnabled="false"
+                    modeSwitchVisible="true"
+                    useMaxResults="false">
+                <properties include=".*"/>
+            </filter>
+            <hbox id="countBox"
+                  align="MIDDLE_CENTER"
+                  spacing="true">
+                <label value="       "/>
+            </hbox>
+        </hbox>
+        <hbox spacing="true">
+            <checkBox id="checkBoxArhiv"
+                      caption="msg://showArhivCapt"/>
+        </hbox>
         <groupTable id="employeesTable"
                     editable="true"
                     multiLineCells="true"
@@ -39,38 +86,55 @@
                 <action id="create"/>
                 <action id="edit"/>
                 <action id="remove"/>
+                <action id="refresh"/>
                 <action id="excel"/>
+                <action id="reportButton"/>
             </actions>
             <columns>
                 <column id="fieldStatus"
                         align="CENTER"
                         caption="msg://fieldStatusName"
                         width="70"/>
+                <column id="expireDateAll"/>
                 <column id="fullName"
                         caption="msg://columnFIOname"/>
-                <column id="direction_work"/>
                 <column id="building"/>
+                <column id="direction_work"
+                        caption="msg://specialistCapt"/>
                 <column id="position"/>
-                <column id="profession"/>
-                <column id="phoneMobile"
+                <column id="phoneHome"
                         caption="msg://phoneColName"/>
                 <column id="emailPrivate"
                         caption="msg://emailColName"/>
-                <column id="dateWorkStart"/>
-                <column id="dateWorkEnd"/>
+                <column id="addressResidential"
+                        visible="false"/>
+                <column id="image_photo"
+                        caption="msg://photoCapt"
+                        generator="generateImage_photoCell"/>
+                <column id="image_sign"
+                        caption="msg://signCapt"
+                        generator="generateImage_signCell"/>
             </columns>
             <rows datasource="employeesDs"/>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
+                <button action="employeesTable.refresh"/>
                 <button id="createBtn"
-                        action="employeesTable.create"/>
+                        action="employeesTable.create"
+                        invoke="onCreateBtnClick"/>
                 <button id="editBtn"
                         action="employeesTable.edit"/>
                 <button id="removeBtn"
                         action="employeesTable.remove"/>
                 <button id="excelBtn"
                         action="employeesTable.excel"/>
+                <button id="reportButton"
+                        caption="msg://reportButtonCapt"
+                        icon="icons/reports-print.png"/>
+                <label id="labelCount"
+                       align="MIDDLE_RIGHT"
+                       width="100%"/>
             </buttonsPanel>
         </groupTable>
     </layout>

@@ -20,21 +20,32 @@
             spacing="true">
         <filter id="filter"
                 applyTo="buildingsTable"
-                datasource="buildingsDs">
+                datasource="buildingsDs"
+                defaultMode="fts"
+                modeSwitchVisible="false"
+                useMaxResults="false">
             <properties include=".*"/>
         </filter>
         <groupTable id="buildingsTable"
                     multiLineCells="true"
                     presentations="true"
                     responsive="true"
+                    stylename="compact small"
                     width="100%">
             <actions>
                 <action id="create"/>
                 <action id="edit"/>
                 <action id="remove"/>
+                <action id="excel"/>
             </actions>
             <columns>
-                <column id="nameShort"/>
+                <column id="numberEmployee"
+                        description="msg://numberCK"
+                        generator="generateNumberEmployeeCell"
+                        maxTextLength="4"
+                        width="20"/>
+                <column id="nameShort"
+                        caption="msg://nameObject"/>
                 <column id="nameFull"/>
                 <column id="customer"/>
                 <column id="contract"/>
@@ -42,17 +53,18 @@
                 <column id="dateBegin"/>
                 <column id="dateEnd"/>
             </columns>
-            <rows datasource="buildingsDs"
-                  rowHeaderMode="ICON"/>
+            <rows datasource="buildingsDs"/>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
-                          alwaysVisible="true">
+                          alwaysVisible="true"
+                          responsive="true">
                 <button id="createBtn"
                         action="buildingsTable.create"/>
                 <button id="editBtn"
                         action="buildingsTable.edit"/>
                 <button id="removeBtn"
                         action="buildingsTable.remove"/>
+                <button action="buildingsTable.excel"/>
             </buttonsPanel>
         </groupTable>
     </layout>

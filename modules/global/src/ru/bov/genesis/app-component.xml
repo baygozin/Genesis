@@ -45,6 +45,11 @@
                   name="app-web"/>
         <artifact configuration="themes"
                   name="app-web-themes"/>
+        <artifact classifier="web"
+                  configuration="webcontent"
+                  ext="zip"
+                  name="app-web-toolkit"
+                  skipIfExists="web-toolkit"/>
         <property name="cuba.springContextConfig"
                   value="+ru/bov/genesis/web-spring.xml"/>
         <property name="cuba.dispatcherSpringContextConfig"
@@ -57,8 +62,14 @@
                   value="+ru/bov/genesis/web-permissions.xml"/>
         <property name="cuba.mainMessagePack"
                   value="+ru.bov.genesis.web"/>
+        <property name="cuba.web.widgetSet"
+                  value="ru.bov.genesis.web.toolkit.ui.AppWidgetSet"/>
     </module>
     <module name="web-themes">
         <artifact name="app-web-themes"/>
+    </module>
+    <module dependsOn="web"
+            name="web-toolkit">
+        <artifact name="app-web-toolkit"/>
     </module>
 </app-component>

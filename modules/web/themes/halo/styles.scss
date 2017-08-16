@@ -6,8 +6,14 @@
 .halo {
   // include auto-generated app components SCSS
   @include app_components;
-  
   @include ru_bov_genesis-halo-ext;
+
+  .my_styled_table .v-table-table th, .my_styled_table .v-table-table td {
+    height: 24px;
+
+  }
+
+  
 
   .v-grid-cell.default-status {
     font-weight: bold;
@@ -15,29 +21,136 @@
 
   .v-grid-cell.yellow-status {
     font-weight: bold;
-    background-color: #aaaa00;
-    color: #ffffff;
+    background-color: #ffff00;
+    color: #202020;
   }
 
   .v-grid-cell.red-status {
     font-weight: bold;
-    background-color: #910000;
-    color: #ffffff;
+    background-color: #ff0000;
+    color: #202020;
   }
 
   .v-grid-cell.green-status {
     font-weight: bold;
-    background-color: #009100;
-    color: #ffffff;
+    background-color: #00ff00;
+    color: #202020;
   }
 
   .v-grid-cell.blue-status {
     font-weight: bold;
-    background-color: blue;
-    color: white;
+    background-color: #0000ff;
+    color: #202020;
+  }
+
+  .v-grid-cell.pink-status {
+    font-weight: bold;
+    background-color: #ff90ff;
+    color: #202020;
+  }
+
+  .v-table-cell-content.default-status {
+    font-weight: bold;
+  }
+
+  .v-table-cell-content.yellow-status {
+    font-weight: bold;
+    background-color: #fffeaf;
+    color: #202020;
+  }
+
+  .v-table-cell-content.pink-status {
+    font-weight: bold;
+    background-color: #ff90ff;
+    color: #202020;
+  }
+
+  .v-table-cell-content.red-status {
+    font-weight: bold;
+    background-color: #ff0000;
+    color: #202020;
+  }
+
+  .v-table-cell-content.green-status {
+    font-weight: bold;
+    background-color: #00ff00;
+    color: #202020;
+  }
+
+  .v-table-cell-content.blue-status {
+    font-weight: bold;
+    background-color: #0000ff;
+    color: #202020;
+  }
+
+  .v-table-cell-content.expire-status {
+    font-weight: bold;
+    background-color: #ff90ff;
+    color: #202020;
+  }
+
+  .v-table-cell-content.work-status {
+    font-weight: bold;
+    background-color: #00c3e1;
+    color: #202020;
+  }
+  .v-table-cell-content.pause-status {
+    font-weight: bold;
+    background-color: #FA8072;
+    color: #202020;
+  }
+
+  .v-grid-cell.work-status {
+    font-weight: bold;
+    background-color: #00c3e1;
+    color: #202020;
+  }
+  .v-grid-cell.pause-status {
+    font-weight: bold;
+    background-color: #FA8072;
+    color: #202020;
   }
 
 }
+
+
+.my-date-field-yellow {
+  // стили для поля ввода даты
+  .v-datefield [class*="textfield"] {
+    color: #202020;
+    background-color: yellow;
+    //border: 4px solid;
+  }
+}
+
+.my-date-field-pink {
+  // стили для поля ввода даты
+  .v-datefield [class*="textfield"] {
+    color: #202020;
+    background-color: #ff7efd;
+    //border: 4px solid;
+  }
+}
+
+.my-date-field-red {
+  // стили для поля ввода даты
+  .v-datefield [class*="textfield"] {
+    color: #202020;
+    background-color: #ff0000;
+    //border: 4px solid;
+  }
+}
+
+//.status-expire-true {
+//    color: #202020;
+//    background-color: #ff7efd;
+//}
+//
+//.status-expire-false {
+//    //color: #202020;
+//    //background-color: #ff0000;
+//    //border: 4px solid;
+//}
 
 default-status {
   font-weight: bold;
@@ -45,20 +158,20 @@ default-status {
 
 yellow-status {
   font-weight: bold;
-  background-color: #aaaa00;
-  color: #ffffff;
+  background-color: #ffff00;
+  color: #202020;
 }
 
 red-status {
   font-weight: bold;
-  background-color: #910000;
-  color: #ffffff;
+  background-color: #ff0000;
+  color: #202020;
 }
 
 green-status {
   font-weight: bold;
-  background-color: #009100;
-  color: #ffffff;
+  background-color: #00ff00;
+  color: #202020;
 }
 
 blue-status {
@@ -67,4 +180,14 @@ blue-status {
   color: white;
 }
 
+work-staus {
+  font-weight: bold;
+  background-color: #00ddde;
+  color: #202020;
+}
 
+pause-status {
+  font-weight: bold;
+  background-color: #dee200;
+  color: #202020;
+}

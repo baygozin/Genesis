@@ -12,8 +12,7 @@
     <context-param>
         <description>List of app properties files for Web Client</description>
         <param-name>appPropertiesConfigWeb</param-name>
-        <param-value>classpath:cuba-web-app.properties
-            classpath:ru/bov/genesis/web-app.properties
+        <param-value>classpath:ru/bov/genesis/web-app.properties
             /WEB-INF/local.app.properties</param-value>
     </context-param>
     <context-param>
@@ -25,14 +24,13 @@
     <context-param>
         <description>List of app properties files for Middleware</description>
         <param-name>appPropertiesConfigCore</param-name>
-        <param-value>classpath:cuba-app.properties
-            classpath:ru/bov/genesis/app.properties
+        <param-value>classpath:ru/bov/genesis/app.properties
             /WEB-INF/local.app.properties</param-value>
     </context-param>
     <!--Application components-->
     <context-param>
         <param-name>appComponents</param-name>
-        <param-value>com.haulmont.cuba com.haulmont.reports com.haulmont.fts com.haulmont.charts com.haulmont.bpm</param-value>
+        <param-value>com.haulmont.cuba com.haulmont.fts com.haulmont.reports com.haulmont.charts com.haulmont.bpm</param-value>
     </context-param>
     <!-- Servlet context listeners that load the application blocks -->
     <listener>

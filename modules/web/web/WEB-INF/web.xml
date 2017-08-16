@@ -11,15 +11,14 @@
     <!-- Application properties config files -->
     <context-param>
         <param-name>appPropertiesConfig</param-name>
-        <param-value>classpath:cuba-web-app.properties
-            classpath:ru/bov/genesis/web-app.properties
+        <param-value>classpath:ru/bov/genesis/web-app.properties
             /WEB-INF/local.app.properties
             "file:${catalina.home}/conf/app/local.app.properties"</param-value>
     </context-param>
     <!--Application components-->
     <context-param>
         <param-name>appComponents</param-name>
-        <param-value>com.haulmont.cuba com.haulmont.reports com.haulmont.fts com.haulmont.charts com.haulmont.bpm</param-value>
+        <param-value>com.haulmont.cuba com.haulmont.fts com.haulmont.reports com.haulmont.charts com.haulmont.bpm</param-value>
     </context-param>
     <listener>
         <listener-class>com.vaadin.server.communication.JSR356WebsocketInitializer</listener-class>

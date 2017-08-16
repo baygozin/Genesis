@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
     <menu id="application"
-          insertBefore="reports">
+          insertBefore="administration">
         <item id="genesis$Employee.browse"
+              icon="font-icon:USER"
               screen="genesis$Employee.browse"/>
         <item id="genesis$Building.browse"
+              icon="font-icon:BUILDING"
               screen="genesis$Building.browse"/>
     </menu>
-    <menu id="setup"
-          insertBefore="reports">
+    <menu id="service"
+          insertBefore="administration">
+        <item screen="report$Report.browse"/>
+        <item screen="report$ReportGroup.browse"/>
         <item openType="NEW_TAB"
               screen="genesis$BagsEntity.browse"/>
+    </menu>
+    <menu id="other"
+          insertBefore="administration">
+        <item screen="screenImportExcel"/>
+        <item openType="NEW_TAB"
+              screen="genesis$ManningProperty.browse"/>
+        <item screen="bpm$ProcInstance.lookup"/>
+        <item screen="bpm$ProcModel.lookup"/>
     </menu>
 </menu-config>

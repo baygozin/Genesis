@@ -21,6 +21,8 @@ import java.util.Collection;
 import com.haulmont.chile.core.annotations.Composition;
 import java.util.List;
 import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
+import javax.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.Email;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
@@ -31,9 +33,14 @@ import static javax.swing.JOptionPane.showMessageDialog;
 public class Employee extends StandardEntity {
     private static final long serialVersionUID = 4684379642843823654L;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "IMAGE_ID")
-    protected FileDescriptor image;
+    @JoinColumn(name = "IMAGE_PHOTO_ID")
+    protected FileDescriptor image_photo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "IMAGE_SIGN_ID")
+    protected FileDescriptor image_sign;
 
     @Column(name = "FIRST_NAME")
     protected String firstName;
@@ -44,34 +51,35 @@ public class Employee extends StandardEntity {
     @Column(name = "LAST_NAME")
     protected String lastName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"clear", "lookup"})
-    @OnDelete(DeletePolicy.UNLINK)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "POSITION_ID")
-    protected Position position;
+    @Lob
+    @Column(name = "FULL_NAME")
+    @MetaProperty(related = "lastName")
+    private String fullName;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"clear", "lookup"})
+
+    @Column(name = "POSITION_")
+    protected String position;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "clear"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DIRECTION_WORK_ID")
     protected Directing direction_work;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"clear", "lookup"})
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "clear"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PROFESSION_ID")
     protected Professions profession;
 
-    @Column(name = "PASS_NUMBER", length = 6)
-    protected String pass_number;
 
-    @Column(name = "PASS_SERIES", length = 5)
-    protected String pass_series;
 
-    @Column(name = "PASS_ISSUED")
-    protected String pass_issued;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "PASS_ISSUED_DATE")
     protected Date pass_issued_date;
+
+    @Lob
+    @Column(name = "PASS_COMMON")
+    protected String pass_common;
 
     @Column(name = "GENDER")
     protected String gender;
@@ -99,24 +107,28 @@ public class Employee extends StandardEntity {
     @Column(name = "MARTIAL_STATUS")
     protected Integer martialStatus;
 
-    @Column(name = "NUMBER_INN", length = 12)
+    @Column(name = "NUMBER_IFNS")
+    protected String numberIFNS;
+
+    @Column(name = "NUMBER_INN")
     protected String numberINN;
 
-    @Column(name = "NUMBER_PFR", length = 14)
+    @Column(name = "NUMBER_PFR")
     protected String numberPFR;
 
-    @Column(name = "PHONE_MOBILE", length = 16)
+    @Column(name = "PHONE_MOBILE")
     protected String phoneMobile;
 
-    @Column(name = "PHONE_HOME", length = 16)
+    @Column(name = "PHONE_HOME")
     protected String phoneHome;
 
-    @Column(name = "PHONE_OFFICE", length = 16)
+    @Column(name = "PHONE_OFFICE")
     protected String phoneOffice;
 
     @Column(name = "EMAIL_PRIVATE")
     protected String emailPrivate;
 
+    @Email
     @Column(name = "EMAIL_OFFICE")
     protected String emailOffice;
 
@@ -241,21 +253,521 @@ public class Employee extends StandardEntity {
     @OneToMany(mappedBy = "employee")
     protected List<StorageFiles> storageFile;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "DATE_WORK_START")
-    protected Date dateWorkStart;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "DATE_WORK_END")
-    protected Date dateWorkEnd;
 
     @Column(name = "FIELD_STATUS")
     protected String fieldStatus;
 
     @Lob
-    @Column(name = "FULL_NAME")
-    @MetaProperty(related = "lastName")
-    private String fullName;
+    @Column(name = "COMMENT_MAN")
+    protected String comment_man;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "clear"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEPARTMENT_ID")
+    protected Department department;
+
+    @Column(name = "DEPARTMENT_TERRITORY")
+    protected String department_territory;
+
+    @Column(name = "CONTRACT_TYPE")
+    protected String contractType;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "CONTRACT_DATE")
+    protected Date contractDate;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "EMPLOYMENT_DATE")
+    protected Date employmentDate;
+
+    @Column(name = "UD_CK_NUMBER")
+    protected String udCkNumber;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "UD_CK_EXPIRE")
+    protected Date udCkExpire;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UD_CK_IMAGE_ID")
+    protected FileDescriptor udCkImage;
+
+    @Column(name = "UD_FIRST_HELP_NUMBER")
+    protected String udFirstHelpNumber;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "UD_FIRST_HELP_EXPIRE")
+    protected Date udFirstHelpExpire;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UD_FIRST_HELP_IMAGE_ID")
+    protected FileDescriptor udFirstHelpImage;
+
+    @Column(name = "UD_ECO_SAF_NUMBER")
+    protected String udEcoSafNumber;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "UD_ECO_SAF_EXPIRE")
+    protected Date udEcoSafExpire;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UD_ECO_SAF_IMAGE_ID")
+    protected FileDescriptor udEcoSafImage;
+
+    @Column(name = "UD_WORK_HI_NUMBER")
+    protected String udWorkHiNumber;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "UD_WORK_HI_EXPIRE")
+    protected Date udWorkHiExpire;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UD_WORK_HI_IMAGE_ID")
+    protected FileDescriptor udWorkHiImage;
+
+    @Column(name = "UD_DRIVE_SAF_NUMBER")
+    protected String udDriveSafNumber;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "UD_DRIVE_SAF_EXPIRE")
+    protected Date udDriveSafExpire;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UD_DRIVE_SAF_IMAGE_ID")
+    protected FileDescriptor udDriveSafImage;
+
+    @Column(name = "UD_EB_NUMBER")
+    protected String udEbNumber;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "UD_EB_EXPIRE")
+    protected Date udEbExpire;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UD_EB_IMAGE_ID")
+    protected FileDescriptor udEbImage;
+
+    @Column(name = "UD_OT_NUMBER")
+    protected String udOtNumber;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "UD_OT_EXPIRE")
+    protected Date udOtExpire;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UD_OT_IMAGE_ID")
+    protected FileDescriptor udOtImage;
+
+    @Column(name = "UD_PTM_NUMBER")
+    protected String udPtmNumber;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "UD_PTM_EXPIRE")
+    protected Date udPtmExpire;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UD_PTM_IMAGE_ID")
+    protected FileDescriptor udPtmImage;
+
+    @Column(name = "UD_PB_NUMBER")
+    protected String udPbNumber;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "UD_PB_EXPIRE")
+    protected Date udPbExpire;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UD_PB_IMAGE_ID")
+    protected FileDescriptor udPbImage;
+
+    @Column(name = "EXPIRE_DATE_ALL")
+    protected String expireDateAll;
+
+
+    @OneToMany(mappedBy = "employee")
+    private List<Event> event;
+
+
+
+
+
+    @Column(name = "ARHIV")
+    private Boolean arhiv;
+
+    @OneToMany(mappedBy = "employee")
+    private List<StorageFiles> vuzFiles;
+
+    @OneToMany(mappedBy = "employee")
+    private List<StorageFiles> vikFiles;
+
+    @OneToMany(mappedBy = "employee")
+    private List<StorageFiles> naksFiles;
+
+    public void setVuzFiles(List<StorageFiles> vuzFiles) {
+        this.vuzFiles = vuzFiles;
+    }
+
+    public List<StorageFiles> getVuzFiles() {
+        return vuzFiles;
+    }
+
+    public void setVikFiles(List<StorageFiles> vikFiles) {
+        this.vikFiles = vikFiles;
+    }
+
+    public List<StorageFiles> getVikFiles() {
+        return vikFiles;
+    }
+
+    public void setNaksFiles(List<StorageFiles> naksFiles) {
+        this.naksFiles = naksFiles;
+    }
+
+    public List<StorageFiles> getNaksFiles() {
+        return naksFiles;
+    }
+
+
+    public void setArhiv(Boolean arhiv) {
+        this.arhiv = arhiv;
+    }
+
+    public Boolean getArhiv() {
+        return arhiv;
+    }
+
+
+    public void setEvent(List<Event> event) {
+        this.event = event;
+    }
+
+    public List<Event> getEvent() {
+        return event;
+    }
+
+
+    public void setExpireDateAll(String expireDateAll) {
+        this.expireDateAll = expireDateAll;
+    }
+
+    public String getExpireDateAll() {
+        return expireDateAll;
+    }
+
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+
+
+    public Date getUdFirstHelpExpire() {
+        return udFirstHelpExpire;
+    }
+
+    public void setUdFirstHelpExpire(Date udFirstHelpExpire) {
+        this.udFirstHelpExpire = udFirstHelpExpire;
+    }
+
+
+    public void setUdCkNumber(String udCkNumber) {
+        this.udCkNumber = udCkNumber;
+    }
+
+    public String getUdCkNumber() {
+        return udCkNumber;
+    }
+
+    public void setUdCkExpire(Date udCkExpire) {
+        this.udCkExpire = udCkExpire;
+    }
+
+    public Date getUdCkExpire() {
+        return udCkExpire;
+    }
+
+    public void setUdCkImage(FileDescriptor udCkImage) {
+        this.udCkImage = udCkImage;
+    }
+
+    public FileDescriptor getUdCkImage() {
+        return udCkImage;
+    }
+
+    public void setUdFirstHelpNumber(String udFirstHelpNumber) {
+        this.udFirstHelpNumber = udFirstHelpNumber;
+    }
+
+    public String getUdFirstHelpNumber() {
+        return udFirstHelpNumber;
+    }
+
+    public void setUdFirstHelpImage(FileDescriptor udFirstHelpImage) {
+        this.udFirstHelpImage = udFirstHelpImage;
+    }
+
+    public FileDescriptor getUdFirstHelpImage() {
+        return udFirstHelpImage;
+    }
+
+    public void setUdEcoSafNumber(String udEcoSafNumber) {
+        this.udEcoSafNumber = udEcoSafNumber;
+    }
+
+    public String getUdEcoSafNumber() {
+        return udEcoSafNumber;
+    }
+
+    public void setUdEcoSafExpire(Date udEcoSafExpire) {
+        this.udEcoSafExpire = udEcoSafExpire;
+    }
+
+    public Date getUdEcoSafExpire() {
+        return udEcoSafExpire;
+    }
+
+    public void setUdEcoSafImage(FileDescriptor udEcoSafImage) {
+        this.udEcoSafImage = udEcoSafImage;
+    }
+
+    public FileDescriptor getUdEcoSafImage() {
+        return udEcoSafImage;
+    }
+
+    public void setUdWorkHiNumber(String udWorkHiNumber) {
+        this.udWorkHiNumber = udWorkHiNumber;
+    }
+
+    public String getUdWorkHiNumber() {
+        return udWorkHiNumber;
+    }
+
+    public void setUdWorkHiExpire(Date udWorkHiExpire) {
+        this.udWorkHiExpire = udWorkHiExpire;
+    }
+
+    public Date getUdWorkHiExpire() {
+        return udWorkHiExpire;
+    }
+
+    public void setUdWorkHiImage(FileDescriptor udWorkHiImage) {
+        this.udWorkHiImage = udWorkHiImage;
+    }
+
+    public FileDescriptor getUdWorkHiImage() {
+        return udWorkHiImage;
+    }
+
+    public void setUdDriveSafNumber(String udDriveSafNumber) {
+        this.udDriveSafNumber = udDriveSafNumber;
+    }
+
+    public String getUdDriveSafNumber() {
+        return udDriveSafNumber;
+    }
+
+    public void setUdDriveSafExpire(Date udDriveSafExpire) {
+        this.udDriveSafExpire = udDriveSafExpire;
+    }
+
+    public Date getUdDriveSafExpire() {
+        return udDriveSafExpire;
+    }
+
+    public void setUdDriveSafImage(FileDescriptor udDriveSafImage) {
+        this.udDriveSafImage = udDriveSafImage;
+    }
+
+    public FileDescriptor getUdDriveSafImage() {
+        return udDriveSafImage;
+    }
+
+    public void setUdEbNumber(String udEbNumber) {
+        this.udEbNumber = udEbNumber;
+    }
+
+    public String getUdEbNumber() {
+        return udEbNumber;
+    }
+
+    public void setUdEbExpire(Date udEbExpire) {
+        this.udEbExpire = udEbExpire;
+    }
+
+    public Date getUdEbExpire() {
+        return udEbExpire;
+    }
+
+    public void setUdEbImage(FileDescriptor udEbImage) {
+        this.udEbImage = udEbImage;
+    }
+
+    public FileDescriptor getUdEbImage() {
+        return udEbImage;
+    }
+
+    public void setUdOtNumber(String udOtNumber) {
+        this.udOtNumber = udOtNumber;
+    }
+
+    public String getUdOtNumber() {
+        return udOtNumber;
+    }
+
+    public void setUdOtExpire(Date udOtExpire) {
+        this.udOtExpire = udOtExpire;
+    }
+
+    public Date getUdOtExpire() {
+        return udOtExpire;
+    }
+
+    public void setUdOtImage(FileDescriptor udOtImage) {
+        this.udOtImage = udOtImage;
+    }
+
+    public FileDescriptor getUdOtImage() {
+        return udOtImage;
+    }
+
+    public void setUdPtmNumber(String udPtmNumber) {
+        this.udPtmNumber = udPtmNumber;
+    }
+
+    public String getUdPtmNumber() {
+        return udPtmNumber;
+    }
+
+    public void setUdPtmExpire(Date udPtmExpire) {
+        this.udPtmExpire = udPtmExpire;
+    }
+
+    public Date getUdPtmExpire() {
+        return udPtmExpire;
+    }
+
+    public void setUdPtmImage(FileDescriptor udPtmImage) {
+        this.udPtmImage = udPtmImage;
+    }
+
+    public FileDescriptor getUdPtmImage() {
+        return udPtmImage;
+    }
+
+    public void setUdPbNumber(String udPbNumber) {
+        this.udPbNumber = udPbNumber;
+    }
+
+    public String getUdPbNumber() {
+        return udPbNumber;
+    }
+
+    public void setUdPbExpire(Date udPbExpire) {
+        this.udPbExpire = udPbExpire;
+    }
+
+    public Date getUdPbExpire() {
+        return udPbExpire;
+    }
+
+    public void setUdPbImage(FileDescriptor udPbImage) {
+        this.udPbImage = udPbImage;
+    }
+
+    public FileDescriptor getUdPbImage() {
+        return udPbImage;
+    }
+
+
+    public void setContractDate(Date contractDate) {
+        this.contractDate = contractDate;
+    }
+
+    public Date getContractDate() {
+        return contractDate;
+    }
+
+    public void setEmploymentDate(Date employmentDate) {
+        this.employmentDate = employmentDate;
+    }
+
+    public Date getEmploymentDate() {
+        return employmentDate;
+    }
+
+
+    public void setContractType(String contractType) {
+        this.contractType = contractType;
+    }
+
+    public String getContractType() {
+        return contractType;
+    }
+
+
+
+    public void setNumberIFNS(String numberIFNS) {
+        this.numberIFNS = numberIFNS;
+    }
+
+    public String getNumberIFNS() {
+        return numberIFNS;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment_territory(String department_territory) {
+        this.department_territory = department_territory;
+    }
+
+    public String getDepartment_territory() {
+        return department_territory;
+    }
+
+
+    public void setComment_man(String comment_man) {
+        this.comment_man = comment_man;
+    }
+
+    public String getComment_man() {
+        return comment_man;
+    }
+
+
+    public void setImage_photo(FileDescriptor image_photo) {
+        this.image_photo = image_photo;
+    }
+
+    public FileDescriptor getImage_photo() {
+        return image_photo;
+    }
+
+    public void setImage_sign(FileDescriptor image_sign) {
+        this.image_sign = image_sign;
+    }
+
+    public FileDescriptor getImage_sign() {
+        return image_sign;
+    }
+
+    public void setPass_common(String pass_common) {
+        this.pass_common = pass_common;
+    }
+
+    public String getPass_common() {
+        return pass_common;
+    }
+
 
     public String getFullName() {
         return getLastName() + " " + getFirstName() + " " + getMiddleName();
@@ -275,21 +787,9 @@ public class Employee extends StandardEntity {
     }
 
 
-    public void setDateWorkStart(Date dateWorkStart) {
-        this.dateWorkStart = dateWorkStart;
-    }
 
-    public Date getDateWorkStart() {
-        return dateWorkStart;
-    }
 
-    public void setDateWorkEnd(Date dateWorkEnd) {
-        this.dateWorkEnd = dateWorkEnd;
-    }
 
-    public Date getDateWorkEnd() {
-        return dateWorkEnd;
-    }
 
 
     public void setStorageFile(List<StorageFiles> storageFile) {
@@ -301,10 +801,9 @@ public class Employee extends StandardEntity {
     }
 
 
+    public Building getBuilding() { return building; }
 
-    public Building getBuilding() {
-        return building;
-    }
+    public void setBuilding(Building building) { this.building = building; }
 
 
     public List<Courses> getCourses() {
@@ -314,8 +813,6 @@ public class Employee extends StandardEntity {
     public void setCourses(List<Courses> courses) {
         this.courses = courses;
     }
-
-
 
 
     public void setMedicalCheckBaseBegin(Date medicalCheckBaseBegin) {
@@ -714,29 +1211,11 @@ public class Employee extends StandardEntity {
     }
 
 
-    public void setPass_number(String pass_number) {
-        this.pass_number = pass_number;
-    }
 
-    public String getPass_number() {
-        return pass_number;
-    }
 
-    public void setPass_series(String pass_series) {
-        this.pass_series = pass_series;
-    }
 
-    public String getPass_series() {
-        return pass_series;
-    }
 
-    public void setPass_issued(String pass_issued) {
-        this.pass_issued = pass_issued;
-    }
 
-    public String getPass_issued() {
-        return pass_issued;
-    }
 
     public void setPass_issued_date(Date pass_issued_date) {
         this.pass_issued_date = pass_issued_date;
@@ -747,13 +1226,7 @@ public class Employee extends StandardEntity {
     }
 
 
-    public void setImage(FileDescriptor image) {
-        this.image = image;
-    }
 
-    public FileDescriptor getImage() {
-        return image;
-    }
 
 
     public void setFirstName(String firstName) {
@@ -780,13 +1253,7 @@ public class Employee extends StandardEntity {
         return lastName;
     }
 
-    public void setPosition(Position position) {
-        this.position = position;
-    }
 
-    public Position getPosition() {
-        return position;
-    }
 
     public void setDirection_work(Directing direction_work) {
         this.direction_work = direction_work;

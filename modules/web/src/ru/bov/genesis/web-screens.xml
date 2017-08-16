@@ -17,10 +17,6 @@
             template="ru/bov/genesis/web/department/department-browse.xml"/>
     <screen id="genesis$Department.edit"
             template="ru/bov/genesis/web/department/department-edit.xml"/>
-    <screen id="genesis$MyPhoto.browse"
-            template="ru/bov/genesis/web/myphoto/my-photo-browse.xml"/>
-    <screen id="genesis$MyPhoto.edit"
-            template="ru/bov/genesis/web/myphoto/my-photo-edit.xml"/>
     <screen id="genesis$TypeDocuments.browse"
             template="ru/bov/genesis/web/typedocuments/type-documents-browse.xml"/>
     <screen id="genesis$TypeDocuments.edit"
@@ -51,4 +47,24 @@
             template="ru/bov/genesis/web/persons/persons-edit.xml"/>
     <screen id="mainWindow"
             template="ru/bov/genesis/web/screens/ext-mainwindow.xml"/>
+    <screen id="screenImportExcel"
+            template="ru/bov/genesis/web/screens/screenImportExcel.xml"/>
+    <screen id="genesis$ManningProperty.browse"
+            template="ru/bov/genesis/web/manningproperty/manning-property-browse.xml"/>
+    <screen id="genesis$ManningProperty.edit"
+            template="ru/bov/genesis/web/manningproperty/manning-property-edit.xml"/>
+    <screen id="genesis$Event.browse"
+            template="ru/bov/genesis/web/event/event-browse.xml"/>
+    <screen id="genesis$Event.edit"
+            template="ru/bov/genesis/web/event/event-edit.xml"/>
+    <screen id="genesis$RequestEntity.browse"
+            template="ru/bov/genesis/web/requestentity/request-entity-browse.xml"/>
+    <screen id="genesis$RequestEntity.edit"
+            template="ru/bov/genesis/web/requestentity/request-entity-edit.xml"/>
+    <screen id="genesis$ClaimCk.edit"
+            template="ru/bov/genesis/web/claimck/claim-ck-edit.xml"/>
+    <screen id="genesis$ClaimCk.edit.copy2"
+            template="ru/bov/genesis/web/claimck/claim-ck-edit-copy2.xml"/>
+    <screen id="genesis$ClaimCk.edit.copy1"
+            template="ru/bov/genesis/web/claimck/claim-ck-edit-copy1.xml"/>
 </screen-config>

@@ -3,10 +3,7 @@ package ru.bov.genesis.web.employee;
 import com.haulmont.cuba.core.app.FileStorageService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FileStorageException;
-import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.gui.WindowManager;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.CreateAction;
 import com.haulmont.cuba.gui.components.actions.EditAction;
@@ -23,14 +20,14 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.Years;
 import org.tltv.gantt.Gantt;
-import org.tltv.gantt.client.shared.AbstractStep;
 import org.tltv.gantt.client.shared.Resolution;
 import org.tltv.gantt.client.shared.Step;
 import org.tltv.gantt.client.shared.SubStep;
+import ru.bov.genesis.web.ToolsFunc;
 import ru.bov.genesis.entity.GanttResolutionEnum;
 import ru.bov.genesis.entity.mainentity.Employee;
 import ru.bov.genesis.entity.mainentity.Event;
-import ru.bov.genesis.entity.services.StausEmployeeEnum;
+import ru.bov.genesis.entity.services.StatusEmployeeEnum;
 import ru.bov.genesis.entity.services.StorageFiles;
 
 import javax.inject.Inject;
@@ -38,13 +35,12 @@ import javax.inject.Named;
 import java.io.ByteArrayInputStream;
 import java.util.*;
 
-import static ru.bov.genesis.ToolsFunc.checkDateExpireTwoMonth;
-import static ru.bov.genesis.utils.GlobalTools.*;
+import static ru.bov.genesis.web.ToolsFunc.checkDateExpireTwoMonth;
+import static ru.bov.genesis.utils.GlobalTools.fullFIO;
+import static ru.bov.genesis.utils.GlobalTools.getPeriodFromRuString;
 
 public class EmployeeEdit extends AbstractEditor<Employee> {
 
-    @Inject
-    private DataManager dm;
     @Inject
     private DateField dateFieldStart;
     @Inject
@@ -74,14 +70,11 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
     @Inject
     private FileStorageService fileStorageService;
 
-    @Named("fieldGroup.image")
-    private FileUploadField uploadField;
-
-    @Inject
-    private Frame windowActions;
-
     @Inject
     private ComponentsFactory componentsFactory;
+
+    @Inject
+    private Label labelNowStatus;
 
     @Inject
     private Label labelFio;
@@ -93,22 +86,10 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
     private Label labelNow;
 
     @Inject
-    private Label ageMan;
-
-    @Inject
-    private FieldGroup fieldGroupPersonal;
-
-    @Inject
     private FieldGroup pasportGroup;
 
     @Inject
     private ExportDisplay exportDisplay;
-
-    @Inject
-    private CheckBox freeEmployeeField;
-
-    @Inject
-    private Metadata metadata;
 
     @Named("eventDataGrid.edit")
     private EditAction eventTableEdit;
@@ -118,15 +99,9 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
     private RemoveAction eventTableRemove;
 
     private Gantt gantt;
-    private String color_step = "00EE00";
-    private String color_work = "00EE00";
-    private String color_pause = "EE0000";
-
-    private StausEmployeeEnum statusEnum;
 
     @Override
     public void init(Map<String, Object> params) {
-        super.init(params);
 
         createGantt();
         ComponentContainer cc = (ComponentContainer) WebComponentsHelper.unwrap(groupBoxCalendar);
@@ -135,7 +110,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         udCkDateExpire.setStyleName(checkDateExpireTwoMonth(((Employee) params.get("ITEM")).getUdCkExpire()));
 
         if (((Employee) params.get("ITEM")).getBuilding() == null) {
-            labelStatus.setValue(", не закреплен за объектом");
+            labelStatus.setValue(", не закреплен за объектом.");
         } else {
             labelStatus.setValue(", закреплен за: ");
         }
@@ -176,7 +151,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
                 gantt.setEndDate((Date) e.getValue());
         });
 
-        lookupPeriodStep.setValue(GanttResolutionEnum.week);
+        lookupPeriodStep.setValue(GanttResolutionEnum.day);
         lookupPeriodStep.addValueChangeListener(e -> {
             if (e.getValue() != null) {
                 if (e.getValue().equals(GanttResolutionEnum.week)) {
@@ -187,9 +162,26 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
             }
         });
 
+        employeeDs.addItemChangeListener(new Datasource.ItemChangeListener<Employee>() {
+            @Override
+            public void itemChanged(Datasource.ItemChangeEvent<Employee> e) {
+                int i = 0;
+            }
+        });
+        employeeDs.addItemPropertyChangeListener(new Datasource.ItemPropertyChangeListener<Employee>() {
+            @Override
+            public void itemPropertyChanged(Datasource.ItemPropertyChangeEvent<Employee> e) {
+                employeeDs.setAllowCommit(true);
+                commit();
+                employeeDs.setAllowCommit(false);
+            }
+        });
+
+        employeeDs.setAllowCommit(false);
+        eventsDs.setRefreshOnComponentValueChange(true);
+
         eventsDs.addItemPropertyChangeListener(event -> {
-            System.out.println("Коммит......");
-            //employeeDs.commit();
+            //Datasource.CommitMode commitMode = event.getDs().getCommitMode();
             fillGant(employeeDs.getItem().getEvent());
         });
 
@@ -198,7 +190,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
             fillGant(employeeDs.getItem().getEvent());
         });
 
-        // Добавление-Редактирование-Удаление событий
+        // Добавление событий
         eventTableCreate.setBeforeActionPerformedHandler(() -> {
             Period periodWork;
             Period periodPause;
@@ -216,7 +208,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
                 values.put("startEvent", start);
                 values.put("stopEvent", DateTime.now().plus(periodWork).toDate());
                 values.put("description", "Вахта");
-                values.put("status", StausEmployeeEnum.fromId("1"));
+                values.put("status", StatusEmployeeEnum.fromId("1"));
                 values.put("object", employeeDs.getItem().getBuilding());
                 eventTableCreate.setInitialValues(values);
             } else {
@@ -227,17 +219,17 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
                     }
                 });
                 Date start = events.get(events.size() - 1).getStopEvent();
-                Date stop = new DateTime(start).plusMonths(1).toDate();
+                //Date stop = new DateTime(start).plusMonths(1).toDate();
                 values.put("startEvent", start);
                 values.put("object", getItem().getBuilding());
-                if (events.get(events.size() - 1).getStatus() == StausEmployeeEnum.fromId("1")) {
+                if (events.get(events.size() - 1).getStatus() == StatusEmployeeEnum.fromId("1")) {
                     values.put("stopEvent", new DateTime(start).plus(periodPause).toDate());
                     values.put("description", "Межвахта");
-                    values.put("status", StausEmployeeEnum.fromId("2"));
-                } else if (events.get(events.size() - 1).getStatus() == StausEmployeeEnum.fromId("2")) {
+                    values.put("status", StatusEmployeeEnum.fromId("2"));
+                } else if (events.get(events.size() - 1).getStatus() == StatusEmployeeEnum.fromId("2")) {
                     values.put("stopEvent", new DateTime(start).plus(periodWork).toDate());
                     values.put("description", "Вахта");
-                    values.put("status", StausEmployeeEnum.fromId("1"));
+                    values.put("status", StatusEmployeeEnum.fromId("1"));
                 }
                 eventTableCreate.setInitialValues(values);
             }
@@ -250,6 +242,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
             }
         });
 
+
     }
 
     @Override
@@ -258,7 +251,17 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         eventDataGrid.sort("startEvent", DataGrid.SortDirection.DESCENDING);
         checkAllAgeFields();
         fillGant(getItem().getEvent());
+        if (getItem().getFieldStatus() != null)
+            labelNowStatus.setValue(getItem().getFieldStatus());
+
     }
+
+//    @Override
+//    protected boolean postCommit(boolean committed, boolean close) {
+//        getItem().setFieldStatus(GlobalTools.getStrStatus(getItem().getEvent()));
+//        //getDsContext().commit();
+//        return super.postCommit(committed, close);
+//    }
 
     // Проверка всех дат на предмет скорого окончания
     private void checkAllAgeFields() {
@@ -302,7 +305,7 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         try {
             bytes = fileStorageService.loadFile(imageFile);
         } catch (FileStorageException e) {
-            showNotification("Файл не загружен", NotificationType.HUMANIZED);
+            showNotification("Файл не загружен - " + e.getLocalizedMessage(), NotificationType.ERROR);
         }
         if (bytes != null) {
             image.setSource(imageFile.getName(), new ByteArrayInputStream(bytes));
@@ -334,7 +337,8 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         List<SubStep> stepList = new ArrayList<>();
         Step step = new Step("");
         step.setDescription("");
-        for (Event event : events) {
+
+         for (Event event : events) {
             SubStep subStep = new SubStep(event.getDescription());
             subStep.setStartDate(event.getStartEvent());
             subStep.setEndDate(event.getStopEvent());
@@ -343,13 +347,14 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
             } else {
                 subStep.setDescription("");
             }
-            if (event.getStatus() == StausEmployeeEnum.fromId("1")) {
-                subStep.setBackgroundColor(color_work);
-            } else if (event.getStatus() == StausEmployeeEnum.fromId("2")) {
-                subStep.setBackgroundColor(color_pause);
+            if (event.getStatus() == StatusEmployeeEnum.fromId("1")) {
+                subStep.setBackgroundColor(ToolsFunc.colorWork);
+            } else if (event.getStatus() == StatusEmployeeEnum.fromId("2")) {
+                subStep.setBackgroundColor(ToolsFunc.colorPause);
             }
             stepList.add(subStep);
         }
+
         step.addSubSteps(stepList);
         gantt.addStep(step);
     }
@@ -361,61 +366,12 @@ public class EmployeeEdit extends AbstractEditor<Employee> {
         gantt.setResizableSteps(false);
         gantt.setMovableSteps(false);
         gantt.setLocale(Locale.forLanguageTag("ru"));
-        gantt.setResolution(Resolution.Week);
-        Date startDate = LocalDate.now().minusMonths(1).toDate();
+        gantt.setResolution(Resolution.Day);
+        Date startDate = LocalDate.now().toDate();
         Date endDate = LocalDate.now().plusMonths(6).toDate();
         gantt.setStartDate(startDate);
         gantt.setEndDate(endDate);
         dateFieldStart.setValue(startDate);
         dateFieldEnd.setValue(endDate);
-        gantt.addClickListener(e -> {
-            if (e.getDetails().isDoubleClick()) {
-                editEvent(e.getStep());
-            }
-        });
-
     }
-
-//    private void changeMoveEvent(Gantt.MoveEvent e) {
-//        changeEvent(e.getPreviousStartDate(), e.getPreviousEndDate(), e.getStartDate(), e.getEndDate());
-//    }
-//
-//    private void changeResizeEvent(Gantt.ResizeEvent e) {
-//        changeEvent(e.getPreviousStartDate(), e.getPreviousEndDate(), e.getStartDate(), e.getEndDate());
-//    }
-//
-//    private void changeEvent(Long pS, Long pE, Long cS, Long cE) {
-//        Date startPrev = new Date(pS);
-//        Date endPrev = new Date(pE);
-//        Date startNow = new Date(cS);
-//        Date endNow = new Date(cE);
-//        List<Event> events = employeeDs.getItem().getEvent();
-//        for (Event event : events) {
-//            if (event.getStartEvent().equals(startPrev) && event.getStopEvent().equals(endPrev)) {
-//                event.setStartEvent(startNow);
-//                event.setStopEvent(endNow);
-//                eventsDs.setItem(event);
-//                eventsDs.commit();
-//                return;
-//            }
-//        }
-//        //eventsDs.refresh();
-//    }
-
-    private void editEvent(AbstractStep step) {
-        Date start = new Date(step.getStartDate());
-        Date end = new Date(step.getEndDate());
-        List<Event> events = employeeDs.getItem().getEvent();
-        for (Event event : events) {
-            if (event.getStartEvent().equals(start) && event.getStopEvent().equals(end)) {
-                openEditor(event, WindowManager.OpenType.DIALOG).addCloseWithCommitListener(() -> {
-                    //employeeDs.refresh();
-                    fillGant(employeeDs.getItem().getEvent());
-                });
-                return;
-            }
-        }
-        eventsDs.refresh();
-    }
-
 }

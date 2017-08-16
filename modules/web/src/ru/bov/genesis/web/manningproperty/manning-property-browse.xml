@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://browseCaption"
+        class="ru.bov.genesis.web.manningproperty.ManningPropertyBrowse"
+        focusComponent="manningPropertiesTable"
+        lookupComponent="manningPropertiesTable"
+        messagesPack="ru.bov.genesis.web.manningproperty">
+    <dsContext>
+        <groupDatasource id="manningPropertiesDs"
+                         class="ru.bov.genesis.entity.services.ManningProperty"
+                         view="_local">
+            <query>
+                <![CDATA[select e from genesis$ManningProperty e]]>
+            </query>
+        </groupDatasource>
+    </dsContext>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="manningPropertiesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="manningPropertiesTable"
+                datasource="manningPropertiesDs">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="manningPropertiesTable"
+                    editable="true"
+                    width="100%">
+            <actions>
+                <action id="create"/>
+                <action id="edit"/>
+                <action id="remove"/>
+            </actions>
+            <columns>
+                <column id="columnExcel"/>
+                <column id="mainClass"/>
+                <column id="fieldClass"/>
+                <column id="typeField"/>
+                <column id="commentUser"/>
+            </columns>
+            <rows datasource="manningPropertiesDs"/>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="manningPropertiesTable.create"/>
+                <button id="editBtn"
+                        action="manningPropertiesTable.edit"/>
+                <button id="removeBtn"
+                        action="manningPropertiesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+    </layout>
+</window>

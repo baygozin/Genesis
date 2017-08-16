@@ -19,6 +19,10 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
+import javax.validation.constraints.Pattern;
+import com.haulmont.cuba.core.entity.annotation.Listeners;
+import javax.validation.constraints.NotNull;
+import ru.bov.genesis.entity.services.Position;
 
 @NamePattern("%s|nameShort")
 @Table(name = "GENESIS_BUILDING")
@@ -58,55 +62,81 @@ public class Building extends StandardEntity {
     @Column(name = "PLACE_SCALE")
     protected Integer placeScale;
 
-    @OnDeleteInverse(DeletePolicy.UNLINK)
-    @OnDelete(DeletePolicy.UNLINK)
     @OneToMany(mappedBy = "building")
     protected List<Employee> employeeCk;
 
-    @OnDeleteInverse(DeletePolicy.UNLINK)
-    @OnDelete(DeletePolicy.UNLINK)
     @OneToMany(mappedBy = "building")
     protected List<Persons> persons;
 
-    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "clear", "open"})
+    @Lookup(type = LookupType.DROPDOWN, actions = {"lookup", "open", "clear"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "IMAGE_CONTRACT_ID")
     protected FileDescriptor imageContract;
 
+
+
+    @NotNull(message = "{msg://ru.bov.genesis.entity.mainentity/periodWorkNot}")
+    @Pattern(message = "{msg://ru.bov.genesis.entity.mainentity/patternMessage}", regexp = "^(\\d{1,2}[\u041C\u043C\u041D\u043D\u0414\u0434]{1}){1,3}$")
+    @Column(name = "PERIOD_WORK", nullable = false)
+    protected String periodWork;
+
+    @NotNull(message = "{msg://ru.bov.genesis.entity.mainentity/periodPauseNot}")
+    @Pattern(message = "{msg://ru.bov.genesis.entity.mainentity/patternMessage}", regexp = "^(\\d{1,2}[\u041C\u043C\u041D\u043D\u0414\u0434]{1}){1,3}$")
+    @Column(name = "PERIOD_PAUSE", nullable = false)
+    protected String periodPause;
+
+
+
+
+
+
     @Column(name = "NUMBER_EMPLOYEE")
-    @MetaProperty(related = "numberEmployee")
     private Integer numberEmployee;
 
-    @Column(name = "VALUE_WORK")
-    protected Integer valueWork;
 
-    @Column(name = "VALUE_PAUSE")
-    protected Integer valuePause;
 
-    public void setValueWork(Integer valueWork) {
-        this.valueWork = valueWork;
+
+    @OneToMany(mappedBy = "building")
+    private List<ClaimCk> claimCk;
+
+    public void setClaimCk(List<ClaimCk> claimCk) {
+        this.claimCk = claimCk;
     }
 
-    public Integer getValueWork() {
-        return valueWork;
+    public List<ClaimCk> getClaimCk() {
+        return claimCk;
     }
 
-    public void setValuePause(Integer valuePause) {
-        this.valuePause = valuePause;
-    }
-
-    public Integer getValuePause() {
-        return valuePause;
-    }
-
-
-    public Integer getNumberEmployee() {
-        return getEmployeeCk().size();
-    }
 
     public void setNumberEmployee(Integer numberEmployee) {
-        this.numberEmployee = getEmployeeCk().size();
+        this.numberEmployee = numberEmployee;
     }
+
+    public Integer getNumberEmployee() {
+        return numberEmployee;
+    }
+
+
+
+
+    public void setPeriodWork(String periodWork) {
+        this.periodWork = periodWork;
+    }
+
+    public String getPeriodWork() {
+        return periodWork;
+    }
+
+    public void setPeriodPause(String periodPause) {
+        this.periodPause = periodPause;
+    }
+
+    public String getPeriodPause() {
+        return periodPause;
+    }
+
+
+
 
 
     public void setImageContract(FileDescriptor imageContract) {

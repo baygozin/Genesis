@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://browseCaption"
+        class="ru.bov.genesis.web.requestentity.RequestEntityBrowse"
+        focusComponent="requestEntitiesTable"
+        lookupComponent="requestEntitiesTable"
+        messagesPack="ru.bov.genesis.web.requestentity">
+    <dsContext>
+        <hierarchicalDatasource id="requestEntitiesDs"
+                                class="ru.bov.genesis.entity.RequestEntity"
+                                hierarchyProperty="parent"
+                                view="requestEntity-view">
+            <query>
+                <![CDATA[select e from genesis$RequestEntity e]]>
+            </query>
+        </hierarchicalDatasource>
+    </dsContext>
+    <dialogMode height="600"
+                width="800"/>
+    <layout spacing="true">
+        <treeTable id="requestEntitiesTable"
+                   height="100%"
+                   width="100%">
+            <actions>
+                <action id="create"
+                        openType="DIALOG"/>
+                <action id="edit"
+                        openType="DIALOG"/>
+                <action id="remove"/>
+            </actions>
+            <columns>
+                <column id="dateIn"/>
+                <column id="specialist"/>
+                <column id="numberSpec"/>
+                <column id="parent"/>
+            </columns>
+            <rows datasource="requestEntitiesDs"/>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="requestEntitiesTable.create"/>
+                <button id="editBtn"
+                        action="requestEntitiesTable.edit"/>
+                <button id="removeBtn"
+                        action="requestEntitiesTable.remove"/>
+            </buttonsPanel>
+        </treeTable>
+    </layout>
+</window>

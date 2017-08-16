@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://editorCaption"
+        class="ru.bov.genesis.web.claimck.ClaimCkEditCopy1"
+        datasource="claimCkDs"
+        focusComponent="fieldGroup"
+        messagesPack="ru.bov.genesis.web.claimck">
+    <dsContext>
+        <datasource id="claimCkDs"
+                    class="ru.bov.genesis.entity.mainentity.ClaimCk"
+                    loadDynamicAttributes="true"
+                    view="claimCk-view"/>
+    </dsContext>
+    <dialogMode closeable="true"
+                forceDialog="true"
+                height="AUTO"
+                modal="true"
+                width="AUTO"/>
+    <layout expand="windowActions"
+            spacing="true">
+        <fieldGroup id="fieldGroup"
+                    datasource="claimCkDs">
+            <column width="250px">
+                <field property="claimDate"/>
+            </column>
+        </fieldGroup>
+        <frame id="windowActions"
+               screen="editWindowActions"/>
+    </layout>
+</window>

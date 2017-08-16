@@ -5,55 +5,45 @@ import com.haulmont.cuba.core.listener.BeforeInsertEntityListener;
 import com.haulmont.cuba.core.listener.BeforeUpdateEntityListener;
 import org.springframework.stereotype.Component;
 import ru.bov.genesis.entity.mainentity.Employee;
+import com.haulmont.cuba.core.listener.BeforeDetachEntityListener;
+import com.haulmont.cuba.core.listener.BeforeAttachEntityListener;
 
-import java.util.Date;
+import static ru.bov.genesis.utils.GlobalTools.statusStr;
 
 /**
  * Created by Administrator on 03.05.2017.
  */
 
-@Component("EmployeeItemListener")
+@Component("genesis_EmployeeItemListener")
 public class EmployeeListener implements
         BeforeInsertEntityListener<Employee>,
-        BeforeUpdateEntityListener<Employee> {
+        BeforeUpdateEntityListener<Employee>,
+        BeforeDetachEntityListener<Employee>,
+        BeforeAttachEntityListener<Employee> {
 
     @Override
     public void onBeforeInsert(Employee entity, EntityManager entityManager) {
-        entity.setFieldStatus(statusStr(entity, entity.getDateWorkStart(), entity.getDateWorkEnd()));
+        entity.setFieldStatus(statusStr(entity));
         entityManager.persist(entity);
     }
 
     @Override
     public void onBeforeUpdate(Employee entity, EntityManager entityManager) {
-        entity.setFieldStatus(statusStr(entity, entity.getDateWorkStart(), entity.getDateWorkEnd()));
+        entity.setFieldStatus(statusStr(entity));
         entityManager.persist(entity);
     }
 
-    private String statusStr(Employee entity, Date start, Date end) {
-        if (entity.getBuilding() != null) {
-            if (isWorkMan(start, end)) {
-                return "вахта";
-            } else {
-                return "межвахта";
-            }
-        } else {
-            System.out.println("==== Свободен ====");
-            return "свободен";
-        }
+
+    @Override
+    public void onBeforeDetach(Employee entity, EntityManager entityManager) {
+        entityManager.persist(entity);
     }
 
-    public boolean isWorkMan(Date start, Date end) {
-        Date current = new Date();
-        if (start != null && end != null) {
-            if (current.after(start) && current.before(end)) {
-                return true;
-            } else if (current.after(end) && current.before(start)) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-        return false;
+
+    @Override
+    public void onBeforeAttach(Employee entity) {
     }
+
+
 }
 

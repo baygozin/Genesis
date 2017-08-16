@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://editorCaption"
+        class="ru.bov.genesis.web.event.EventEdit"
+        datasource="eventDs"
+        focusComponent="fieldGroup"
+        messagesPack="ru.bov.genesis.web.event">
+    <dsContext>
+        <datasource id="eventDs"
+                    class="ru.bov.genesis.entity.mainentity.Event"
+                    loadDynamicAttributes="true"
+                    view="event-view"/>
+        <collectionDatasource id="objectsDs"
+                              class="ru.bov.genesis.entity.mainentity.Building"
+                              view="_minimal">
+            <query>
+                <![CDATA[select e from genesis$Building e]]>
+            </query>
+        </collectionDatasource>
+    </dsContext>
+    <dialogMode closeable="true"
+                forceDialog="true"
+                height="350"
+                modal="true"
+                resizable="true"
+                width="500"/>
+    <layout expand="windowActions"
+            margin="true"
+            spacing="true">
+        <fieldGroup id="fieldGroup"
+                    datasource="eventDs"
+                    responsive="true">
+            <column width="350px">
+                <field property="startEvent"
+                       tabIndex="0"
+                       width="100px"/>
+                <field property="stopEvent"
+                       tabIndex="1"
+                       width="100px"/>
+                <field property="status"
+                       tabIndex="2"/>
+                <field property="description"
+                       rows="1"
+                       tabIndex="3"/>
+                <field property="commentary"
+                       rows="5"
+                       tabIndex="4"/>
+                <field optionsDatasource="objectsDs"
+                       property="object"
+                       tabIndex="5"/>
+            </column>
+        </fieldGroup>
+        <frame id="windowActions"
+               responsive="true"
+               screen="editWindowActions"/>
+    </layout>
+</window>

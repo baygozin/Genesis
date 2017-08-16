@@ -1,4 +1,12 @@
 /* Define your theme modifications inside next mixin */
+@import "../../halo/halo";
+@import "../../VAADIN/addons/gantt/gantt";
+@import "../../VAADIN/addons/gantt/gantt-valo";
+
 @mixin ru_bov_genesis-halo-ext {
+  @include halo;
+
+  @include gantt;
+  @include gantt-valo;
 
 }

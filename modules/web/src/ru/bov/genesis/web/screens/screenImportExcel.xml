@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://caption"
+        class="ru.bov.genesis.web.screens.Screenimportexcel"
+        messagesPack="ru.bov.genesis.web.screens">
+    <dsContext>
+        <collectionDatasource id="manningPropertiesDs"
+                              class="ru.bov.genesis.entity.services.ManningProperty"
+                              view="manningProperty-view">
+            <query>
+                <![CDATA[select e from genesis$ManningProperty e]]>
+            </query>
+        </collectionDatasource>
+        <collectionDatasource id="employeesDs"
+                              class="ru.bov.genesis.entity.mainentity.Employee"
+                              view="employee-view">
+            <query>
+                <![CDATA[select e from genesis$Employee e]]>
+            </query>
+        </collectionDatasource>
+        <collectionDatasource id="directingsDs"
+                              class="ru.bov.genesis.entity.services.Directing"
+                              loadDynamicAttributes="true"
+                              view="directing-view">
+            <query>
+                <![CDATA[select e from genesis$Directing e]]>
+            </query>
+        </collectionDatasource>
+    </dsContext>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="propertyDataGrid_groupBox_hbox"
+            spacing="true">
+        <hbox id="uploadHBox"
+              margin="true"
+              spacing="true"
+              width="100%">
+            <upload id="uploadField"
+                    responsive="true"
+                    showClearButton="true"
+                    showFileName="true"/>
+        </hbox>
+        <hbox id="propertyDataGrid_groupBox_hbox"
+              expand="propertyDataGrid"
+              width="100%">
+            <dataGrid id="propertyDataGrid"
+                      columnsCollapsingAllowed="false"
+                      datasource="manningPropertiesDs"
+                      editorEnabled="true"
+                      height="100%"
+                      reorderingAllowed="false"
+                      responsive="true">
+                <actions>
+                    <action id="create"/>
+                    <action id="remove"/>
+                </actions>
+                <columns>
+                    <column property="columnExcel"
+                            width="200"/>
+                    <column property="mainClass"
+                            width="200"/>
+                    <column property="fieldClass"/>
+                    <column editable="false"
+                            property="typeField"/>
+                    <column editable="false"
+                            property="commentUser"/>
+                </columns>
+                <rowsCount/>
+                <buttonsPanel>
+                    <button action="propertyDataGrid.create"/>
+                    <button action="propertyDataGrid.remove"/>
+                </buttonsPanel>
+            </dataGrid>
+            <textArea id="textConsole"
+                      height="100%"
+                      width="600px"/>
+        </hbox>
+    </layout>
+</window>

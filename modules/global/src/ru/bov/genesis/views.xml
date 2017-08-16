@@ -1,20 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
-    <view class="ru.bov.genesis.entity.test.MyPhoto"
-          extends="_local"
-          name="myPhoto-view">
-        <property name="image"
-                  view="_minimal">
-        </property>
-    </view>
     <view class="ru.bov.genesis.entity.mainentity.Employee"
           extends="_local"
           name="employee-view">
-        <property name="image"
-                  view="_minimal"/>
-        <property name="position"
-                  view="_minimal">
-        </property>
         <property name="direction_work"
                   view="_minimal">
         </property>
@@ -29,15 +17,66 @@
         <property name="courses"
                   view="_minimal"/>
         <property name="building"
-                  view="_minimal"/>
+                  view="_minimal">
+            <property name="nameFull"/>
+            <property name="customer"/>
+            <property name="contract"/>
+            <property name="typeWork"/>
+            <property name="dateBegin"/>
+            <property name="dateEnd"/>
+            <property name="place"/>
+            <property name="placeType"/>
+            <property name="placeScale"/>
+            <property name="persons"
+                      view="_minimal"/>
+            <property name="imageContract"
+                      view="_minimal"/>
+            <property name="periodWork"/>
+            <property name="periodPause"/>
+        </property>
         <property name="storageFile"
+                  view="_minimal"/>
+        <property fetch="AUTO"
+                  name="image_photo"
+                  view="_minimal"/>
+        <property fetch="AUTO"
+                  name="image_sign"
+                  view="_minimal"/>
+        <property name="department"
+                  view="_minimal"/>
+        <property name="udCkImage"
+                  view="_minimal"/>
+        <property name="udFirstHelpImage"
+                  view="_minimal"/>
+        <property name="udEcoSafImage"
+                  view="_minimal"/>
+        <property name="udWorkHiImage"
+                  view="_minimal"/>
+        <property name="udDriveSafImage"
+                  view="_minimal"/>
+        <property name="udEbImage"
+                  view="_minimal"/>
+        <property name="udOtImage"
+                  view="_minimal"/>
+        <property name="udPtmImage"
+                  view="_minimal"/>
+        <property name="udPbImage"
+                  view="_minimal"/>
+        <property name="event"
+                  view="event-view">
+        </property>
+        <property name="vuzFiles"
+                  view="_minimal"/>
+        <property name="vikFiles"
+                  view="_minimal"/>
+        <property name="naksFiles"
                   view="_minimal"/>
     </view>
     <view class="ru.bov.genesis.entity.services.Department"
           extends="_local"
           name="department-view"/>
     <view class="ru.bov.genesis.entity.services.Directing"
-          extends="_local"
+          extends="_minimal"
           name="directing-view"/>
     <view class="ru.bov.genesis.entity.services.Position"
           extends="_local"
@@ -73,29 +112,72 @@
           name="building-view">
         <property name="employeeCk"
                   view="_minimal">
-            <property name="position">
-                <property name="namePosition"/>
-            </property>
             <property name="direction_work">
                 <property name="nameDirecting"/>
             </property>
             <property name="profession">
                 <property name="nameProfession"/>
             </property>
-            <property name="dateWorkStart"/>
-            <property name="dateWorkEnd"/>
             <property name="phoneMobile"/>
             <property name="phoneHome"/>
             <property name="phoneOffice"/>
             <property name="emailPrivate"/>
             <property name="emailOffice"/>
+            <property name="building"
+                      view="_minimal"/>
         </property>
         <property name="persons"
                   view="_minimal"/>
         <property name="imageContract"
                   view="_minimal"/>
+        <property name="claimCk"
+                  view="_minimal">
+            <property name="parentClaim"
+                      view="_minimal">
+                <property name="claimDate"/>
+            </property>
+            <property name="claimDate"/>
+            <property name="specialty">
+                <property name="nameDirecting"/>
+            </property>
+        </property>
     </view>
     <view class="ru.bov.genesis.entity.services.Persons"
           extends="_local"
           name="persons-view"/>
+    <view class="ru.bov.genesis.entity.services.ManningProperty"
+          extends="_local"
+          name="manningProperty-view"/>
+    <view class="ru.bov.genesis.entity.mainentity.Event"
+          extends="_local"
+          name="event-view">
+        <property name="object"
+                  view="_minimal"/>
+        <property name="employee">
+            <property name="fieldStatus"/>
+        </property>
+    </view>
+    <view class="ru.bov.genesis.entity.RequestEntity"
+          extends="_local"
+          name="requestEntity-view">
+        <property name="specialist"
+                  view="_minimal"/>
+        <property name="parent">
+            <property name="dateIn"/>
+        </property>
+    </view>
+    <view class="ru.bov.genesis.entity.mainentity.ClaimCk"
+          extends="_local"
+          name="claimCk-view">
+        <property name="parentClaim"
+                  view="_minimal">
+            <property name="claimDate"/>
+        </property>
+        <property name="specialty"
+                  view="_minimal"/>
+    </view>
+    <view class="ru.bov.genesis.entity.mainentity.ClaimCk"
+          extends="claimCk-view"
+          name="claimCk-date-view">
+    </view>
 </views>

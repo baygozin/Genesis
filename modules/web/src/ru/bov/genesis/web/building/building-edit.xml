@@ -3,227 +3,332 @@
         caption="msg://editorCaption"
         class="ru.bov.genesis.web.building.BuildingEdit"
         datasource="buildingDs"
-        focusComponent="fieldGroup"
+        focusComponent="fieldGroup1"
         messagesPack="ru.bov.genesis.web.building"
         xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd">
     <dsContext>
         <datasource id="buildingDs"
                     class="ru.bov.genesis.entity.mainentity.Building"
+                    loadDynamicAttributes="true"
                     view="building-view">
             <collectionDatasource id="employeeCkDs"
                                   property="employeeCk"/>
             <collectionDatasource id="personsDs"
                                   property="persons"/>
+            <hierarchicalDatasource id="claimCkDs"
+                                    hierarchyProperty="parentClaim"
+                                    property="claimCk"/>
         </datasource>
         <collectionDatasource id="imageContractsDs"
                               class="com.haulmont.cuba.core.entity.FileDescriptor"
                               view="_minimal"/>
+        <valueCollectionDatasource id="countDirectionDs">
+            <query>
+                <![CDATA[select e.direction_work.nameDirecting, count(e.direction_work) 
+from genesis$Employee e
+where e.building.id = :custom$id group by e.direction_work
+order by e.direction_work.nameDirecting asc]]>
+            </query>
+            <properties idProperty="directionName">
+                <property datatype="string"
+                          name="directionName"/>
+                <property datatype="decimal"
+                          name="directionCount"/>
+            </properties>
+        </valueCollectionDatasource>
+        <collectionDatasource id="directingsDs"
+                              class="ru.bov.genesis.entity.services.Directing"
+                              view="directing-view">
+            <query>
+                <![CDATA[select e from genesis$Directing e]]>
+            </query>
+        </collectionDatasource>
+        <collectionDatasource id="employeesCkCellsDs"
+                              class="ru.bov.genesis.entity.mainentity.Employee"
+                              view="employee-view">
+            <query>
+                <![CDATA[select e from genesis$Employee e ]]>
+            </query>
+        </collectionDatasource>
+        <valueCollectionDatasource id="countDirectionWorkDs">
+            <query>
+                <![CDATA[select direction.nameDirecting, count(direction) 
+from genesis$Employee e
+  left join e.event as event 
+  left join e.direction_work as direction
+where e.building.id = :custom$id 
+  and direction.nameDirecting = :custom$direction
+  and CURRENT_DATE BETWEEN event.startEvent AND event.stopEvent
+  and event.status = '1'
+group by direction
+order by direction.nameDirecting asc]]>
+            </query>
+            <properties idProperty="directionName">
+                <property datatype="string"
+                          name="directionName"/>
+                <property datatype="decimal"
+                          name="directionCount"/>
+            </properties>
+        </valueCollectionDatasource>
     </dsContext>
     <dialogMode height="600"
                 width="800"/>
     <layout expand="tabSheetBuilding"
+            margin="true"
             spacing="true">
+        <vbox>
+            <hbox spacing="true"
+                  width="100%">
+                <label id="labelObject"
+                       align="MIDDLE_LEFT"
+                       datasource="buildingDs"
+                       property="nameShort"
+                       stylename="h2 bold"/>
+                <label id="labelNow"
+                       align="MIDDLE_RIGHT"
+                       stylename="h2 bold"/>
+            </hbox>
+            <label id="labelCount"/>
+        </vbox>
         <tabSheet id="tabSheetBuilding">
-            <tab id="tabSheetCommon"
-                 caption="msg://commonInfo"
-                 margin="true">
-                <hbox id="hboxMap"
-                      height="100%"
-                      spacing="true"
-                      width="100%">
-                    <split id="splitLine"
-                           height="100%"
-                           orientation="horizontal"
-                           width="100%">
-                        <groupBox id="groupBoxData"
-                                  caption="msg://commonInfo"
-                                  height="100%"
-                                  spacing="true">
-                            <vbox id="vboxData"
-                                  height="100%"
-                                  margin="true"
-                                  spacing="true">
-                                <fieldGroup id="fieldGroup"
-                                            border="visible"
-                                            datasource="buildingDs"
-                                            width="100%">
-                                    <column>
-                                        <field property="nameShort"
-                                               tabIndex="1"/>
-                                        <field property="customer"
-                                               rows="4"
-                                               tabIndex="3"/>
-                                        <field caption="msg://fieldContractName"
-                                               property="contract"
-                                               tabIndex="4"/>
-                                        <field property="dateBegin"
-                                               tabIndex="6"/>
-                                        <field property="dateEnd"
-                                               tabIndex="7"/>
-                                        <field caption="msg://fieldFileName"
-                                               optionsDatasource="imageContractsDs"
-                                               property="imageContract"/>
-                                    </column>
-                                    <column width="250px">
-                                        <field caption="msg://fullName"
-                                               property="nameFull"
-                                               rows="2"
-                                               tabIndex="2"/>
-                                        <field property="typeWork"
-                                               rows="4"
-                                               tabIndex="5"/>
-                                        <field caption="msg://placeName"
-                                               property="place"
-                                               tabIndex="8"/>
-                                    </column>
-                                </fieldGroup>
-                            </vbox>
-                        </groupBox>
-                        <vbox id="vboxMap"
-                              expand="googleMapView_groupBox"
-                              height="100%"
-                              spacing="true"
-                              width="AUTO">
-                            <groupBox id="googleMapView_groupBox"
-                                      caption="msg://mapBuilding"
-                                      spacing="true">
-                                <chart:mapViewer id="googleMapView"
-                                                 height="500px"
-                                                 mapType="terrain"
-                                                 width="500px"/>
-                            </groupBox>
-                            <lookupField id="typeMap"
-                                         caption="msg://typeMapName"
-                                         datasource="buildingDs"
-                                         filterMode="NO"
-                                         property="placeType"/>
-                        </vbox>
-                    </split>
-                </hbox>
-            </tab>
             <tab id="tabSheetCK"
                  caption="msg://tabGroupCK"
                  margin="true"
                  spacing="true">
-                <vbox>
-                    <hbox height="100%"
-                          width="100%">
-                        <groupBox id="groupBoxEmployee"
-                                  caption="msg://dataGroupBoxName">
-                            <dataGrid id="dataGridEmployeeCK"
-                                      datasource="employeeCkDs"
-                                      height="100%"
-                                      reorderingAllowed="false"
-                                      textSelectionEnabled="true"
-                                      width="100%">
-                                <actions>
-                                    <action id="add"/>
-                                    <action id="exclude"/>
-                                </actions>
-                                <columns>
-                                    <column id="fieldStatus"
-                                            caption="msg://fieldStatusName"
-                                            collapsible="false"
-                                            editable="false"
-                                            maximumWidth="75"
-                                            minimumWidth="75"
-                                            property="fieldStatus"
-                                            resizable="false"
-                                            width="75"/>
-                                    <column id="fieldFio"
-                                            caption="msg://fullFioName"
-                                            collapsible="false"
-                                            editable="false"/>
-                                    <column id="fieldPosition"
-                                            editable="false"
-                                            property="position"/>
-                                    <column id="fieldDirectionWork"
-                                            editable="false"
-                                            property="direction_work"/>
-                                    <column id="fieldDateWorkStart"
-                                            property="dateWorkStart"/>
-                                    <column id="fieldDateWorkEnd"
-                                            property="dateWorkEnd"/>
-                                    <column id="fieldPhone"
-                                            caption="msg://phonesName"
-                                            editable="false"
-                                            property="phoneHome"/>
-                                </columns>
-                                <rowsCount/>
-                                <buttonsPanel>
-                                    <button action="dataGridEmployeeCK.add"/>
-                                    <button action="dataGridEmployeeCK.exclude"/>
-                                </buttonsPanel>
-                            </dataGrid>
-                        </groupBox>
+                <hbox id="hboxGroupCk"
+                      expand="flowBoxGroupCk"
+                      height="100%"
+                      margin="true"
+                      width="100%">
+                    <groupBox id="flowBoxGroupCk"
+                              caption="msg://groupCkName"
+                              height="100%"
+                              orientation="horizontal">
+                        <dataGrid id="dataGridEmployeeCK"
+                                  columnResizeMode="SIMPLE"
+                                  datasource="employeeCkDs"
+                                  editorBuffered="false"
+                                  height="100%"
+                                  responsive="true"
+                                  stylename="compact small"
+                                  textSelectionEnabled="true"
+                                  width="100%">
+                            <actions>
+                                <action id="add"/>
+                                <action id="exclude"/>
+                                <action id="excel"
+                                        visible="false"/>
+                                <action id="edit"/>
+                                <action id="refresh"/>
+                            </actions>
+                            <columns>
+                                <column property="fieldStatus"
+                                        width="120"/>
+                                <column property="fullName"
+                                        width="10"/>
+                                <column editable="false"
+                                        property="direction_work"/>
+                                <column editable="false"
+                                        property="phoneHome"/>
+                                <column editable="false"
+                                        property="emailPrivate"/>
+                            </columns>
+                            <rowsCount/>
+                            <buttonsPanel>
+                                <button id="addButton"
+                                        action="dataGridEmployeeCK.add"/>
+                                <button id="editButton"
+                                        action="dataGridEmployeeCK.edit"/>
+                                <button id="excludeButton"
+                                        action="dataGridEmployeeCK.exclude"/>
+                                <button id="excelButton"
+                                        action="dataGridEmployeeCK.excel"/>
+                                <label align="MIDDLE_RIGHT"
+                                       value="msg://specializaciaEmpl"/>
+                                <lookupField id="lookupFieldFilter"
+                                             align="MIDDLE_RIGHT"
+                                             filterMode="NO"
+                                             nullName="msg://nullAll"
+                                             width="200px"/>
+                            </buttonsPanel>
+                        </dataGrid>
+                    </groupBox>
+                    <groupBox id="flowBoxClaimCk"
+                              caption="msg://claimCkCapt"
+                              height="100%"
+                              orientation="horizontal"
+                              width="620px">
+                        <treeTable id="claimCkTable"
+                                   columnControlVisible="false"
+                                   height="100%"
+                                   reorderingAllowed="false"
+                                   settingsEnabled="false"
+                                   stylename="compact small"
+                                   width="600px">
+                            <actions>
+                                <action id="createClaim"
+                                        invoke="onCreateClaim"
+                                        openType="DIALOG"/>
+                                <action id="createSpec"
+                                        invoke="onCreateSpec"
+                                        openType="DIALOG"
+                                        trackSelection="true"/>
+                                <action id="removeClaimAndSpec"
+                                        invoke="onRemoveClaim"
+                                        trackSelection="true"/>
+                                <action id="recrutSpec"
+                                        invoke="onRecrutSpec"
+                                        trackSelection="true"/>
+                            </actions>
+                            <columns>
+                                <column id="claimDate"/>
+                                <column id="specialty"/>
+                                <column id="numberSpeciality"
+                                        caption="msg://numberClaimCapt"/>
+                                <column id="numberCurrent"
+                                        caption="msg://numberCurrentCapt"
+                                        generator="generateNumberCurrentCell"/>
+                                <column id="numberWork"
+                                        caption="msg://numberWorkCapt"
+                                        generator="generateNumberWorkCell"/>
+                            </columns>
+                            <rows datasource="claimCkDs"/>
+                            <buttonsPanel expand="recrutSpecButton">
+                                <button id="createClaimButton"
+                                        action="claimCkTable.createClaim"
+                                        caption="msg://claimCreateCapt"
+                                        icon="icons/plus-btn.png"/>
+                                <button id="createSpecButton"
+                                        action="claimCkTable.createSpec"
+                                        caption="msg://claimSpecPlusCapt"
+                                        icon="icons/plus-btn.png"/>
+                                <button id="removeClaimAndSpecButton"
+                                        action="claimCkTable.removeClaimAndSpec"
+                                        caption="msg://removeClaimCapt"
+                                        icon="icons/remove.png"/>
+                                <button id="recrutSpecButton"
+                                        action="claimCkTable.recrutSpec"
+                                        caption="msg://claimRecrutCapt"/>
+                            </buttonsPanel>
+                        </treeTable>
+                    </groupBox>
+                </hbox>
+            </tab>
+            <tab id="tabNewGant"
+                 caption="msg://newGantCaption"
+                 margin="true,false,false,false"
+                 spacing="true">
+                <vbox id="vBoxCalendar"
+                      expand="groupBoxGantt"
+                      height="100%"
+                      margin="true"
+                      spacing="true">
+                    <hbox id="hBoxButtons"
+                          spacing="true">
+                        <dateField id="dateFieldStart"
+                                   caption="msg://dateStart"
+                                   resolution="DAY"/>
+                        <dateField id="dateFieldEnd"
+                                   caption="msg://dateEnd"
+                                   resolution="DAY"/>
+                        <lookupField id="lookupPeriodStep"
+                                     caption="msg://periodCapt"
+                                     nullOptionVisible="false"
+                                     optionsEnum="ru.bov.genesis.entity.GanttResolutionEnum"/>
+                        <lookupField id="lookupFieldGantt"
+                                     caption="msg://specializaciaEmpl"
+                                     filterMode="NO"
+                                     nullName="msg://nullAll"
+                                     width="200px"/>
                     </hbox>
+                    <groupBox id="groupBoxGantt"
+                              spacing="true"/>
                 </vbox>
             </tab>
-            <tab id="ganttCK"
-                 caption="msg://gantCkNameTab"
-                 margin="true"
-                 spacing="true">
-                <groupBox id="ganttGroupBox"
+            <tab id="tabSheetCommon"
+                 caption="msg://commonInfo"
+                 margin="true">
+                <hbox id="hboxMap"
+                      expand="vboxMap"
+                      height="100%"
+                      spacing="true"
+                      width="100%">
+                    <vbox id="vboxData"
                           height="100%"
+                          margin="true"
                           responsive="true"
-                          showAsPanel="true"
-                          spacing="true">
-                    <chart:ganttChart id="ganttChart"
-                                      accessible="true"
-                                      additionalSegmentFields="task"
-                                      balloonDateFormat="JJ:NN"
-                                      categoryField="category"
-                                      colorField="color"
-                                      columnSpacing="20"
-                                      columnWidth="1"
-                                      endDateField="end"
-                                      height="100%"
-                                      marginRight="70"
-                                      period="DD"
-                                      rotate="true"
-                                      segmentsField="segments"
-                                      startDateField="start"
-                                      startEffect="BOUNCE"
-                                      theme="BLACK"
-                                      width="100%">
-                        <chart:graph balloonText="[[task]]"
-                                     dashLength="2"
-                                     fillAlphas="1"
-                                     fixedColumnWidth="20"
-                                     labelPosition="MIDDLE"
-                                     labelText="[[open]]/[[value]]"
-                                     lineAlpha="1"
-                                     lineColor="WHITE">
-                            <chart:labelFunction>
-                                <![CDATA[
-                                    function(item, value) {
-                                        var dateOpen  = new Date(item.values.open);
-                                        var dateClose = new Date(item.values.value);
-                                        return AmCharts.formatDate(dateOpen, "DD.MM") +
-                                            " - " + AmCharts.formatDate(dateClose, "DD.MM");
-                                    }
-                                ]]>
-                            </chart:labelFunction>
-                        </chart:graph>
-                        <chart:valueAxis type="DATE">
-
-                        </chart:valueAxis>
-                        <chart:valueScrollbar autoGridCount="false"
-                                              color="BLACK"/>
-                        <chart:chartCursor cursorAlpha="0"
-                                           cursorColor="#FFFFFF"
-                                           bulletsEnabled="true"
-                                           fullWidth="false"
-                                           valueBalloonsEnabled="false"
-                                           categoryBalloonDateFormat="DD.MM"
-                                           valueLineAlpha="0.5"
-                                           valueLineBalloonEnabled="true"
-                                           valueLineEnabled="true"
-                                           valueZoomable="true"
-                                           zoomable="false"/>
-                        <chart:export/>
-                    </chart:ganttChart>
-                </groupBox>
+                          spacing="true"
+                          width="AUTO">
+                        <vbox id="fieldGroup1_hbox"
+                              expand="fieldGroup2"
+                              margin="true"
+                              spacing="true"
+                              width="490px">
+                            <fieldGroup id="fieldGroup1"
+                                        datasource="buildingDs"
+                                        responsive="true"
+                                        width="100%">
+                                <column fieldCaptionWidth="150px"
+                                        width="300px">
+                                    <field caption="msg://shortName"
+                                           property="nameShort"
+                                           tabIndex="1"/>
+                                    <field caption="msg://fullName"
+                                           property="nameFull"
+                                           rows="6"
+                                           tabIndex="2"/>
+                                    <field property="customer"
+                                           rows="2"
+                                           tabIndex="3"/>
+                                    <field property="typeWork"
+                                           rows="5"
+                                           tabIndex="5"/>
+                                </column>
+                            </fieldGroup>
+                            <fieldGroup id="fieldGroup2"
+                                        datasource="buildingDs"
+                                        responsive="true"
+                                        width="100%">
+                                <column fieldCaptionWidth="150px"
+                                        width="300px">
+                                    <field property="contract"/>
+                                    <field property="dateBegin"/>
+                                    <field property="dateEnd"/>
+                                    <field property="imageContract"/>
+                                    <field property="periodWork"/>
+                                    <field property="periodPause"/>
+                                </column>
+                            </fieldGroup>
+                        </vbox>
+                    </vbox>
+                    <vbox id="vboxMap"
+                          expand="googleMapView"
+                          height="100%"
+                          spacing="true"
+                          width="500px">
+                        <chart:mapViewer id="googleMapView"
+                                         height="500px"
+                                         mapType="terrain"
+                                         width="500px"/>
+                        <hbox margin="true"
+                              width="500px">
+                            <textField id="place"
+                                       caption="msg://coordinateName"
+                                       datasource="buildingDs"
+                                       property="place"
+                                       width="200px"/>
+                            <lookupField id="typeMap"
+                                         caption="msg://typeMapName"
+                                         datasource="buildingDs"
+                                         filterMode="NO"
+                                         property="placeType"
+                                         width="200px"/>
+                            <label id="labelSpring"
+                                   value="    "
+                                   width="100%"/>
+                        </hbox>
+                    </vbox>
+                </hbox>
             </tab>
             <tab id="commonData"
                  caption="msg://Tab"
@@ -239,6 +344,7 @@
                             <action id="create"/>
                             <action id="edit"/>
                             <action id="remove"/>
+                            <action id="excel"/>
                         </actions>
                         <columns>
                             <column id="namePerson"/>
@@ -252,12 +358,14 @@
                             <button action="personsTable.create"/>
                             <button action="personsTable.edit"/>
                             <button action="personsTable.remove"/>
+                            <button action="personsTable.excel"/>
                         </buttonsPanel>
                     </table>
                 </groupBox>
             </tab>
         </tabSheet>
         <frame id="windowActions"
+               responsive="true"
                screen="editWindowActions"/>
     </layout>
 </window>
